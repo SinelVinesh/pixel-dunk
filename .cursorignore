@@ -1,0 +1,8 @@
+.godot
+.vscode
+.editorconfig
+.gitattributes
+icon.svg
+addons/*
+icon.svg.import
+project.godot
