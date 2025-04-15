@@ -132,10 +132,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -150.0
-offset_right = 200.0
-offset_bottom = 150.0
+offset_left = -181.0
+offset_top = -309.0
+offset_right = 362.0
+offset_bottom = 145.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_n2vy5")
@@ -166,16 +166,17 @@ offset_right = 180.0
 offset_bottom = 126.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Movement: WASD or Arrow Keys
+text = "KEYBOARD:
+Movement: ZQSD or Arrow Keys
 Jump: SPACE
 Dash: SHIFT
 Pass: E
 
-When having the ball:
-- You can only move by dashing
-- Passing recharges your dash count
-- Jumps allow for more aerial control
-- Double jump with SPACE in mid-air"
+CONTROLLER:
+Movement: Left Stick or D-Pad
+Jump: A Button
+Dash: B Button
+Pass: X Button"
 horizontal_alignment = 1
 
 [node name="CloseButton" type="Button" parent="UI/ControlsPanel" groups=["buttons"]]
