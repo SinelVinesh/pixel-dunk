@@ -1,7 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://jfb05w7hm3wa"]
-
-[ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="1_35t7f"]
-[ext_resource type="Script" uid="uid://nt1t181hmdji" path="res://entities/player/InputSetup.gd" id="2_ouf45"]
+[gd_scene load_steps=3 format=3 uid="uid://jfb05w7hm3wa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ouf45"]
 size = Vector2(1038, 38)
@@ -10,9 +7,6 @@ size = Vector2(1038, 38)
 size = Vector2(187.5, 22)
 
 [node name="Field" type="Node2D"]
-
-[node name="Player" parent="." instance=ExtResource("1_35t7f")]
-position = Vector2(582, 379)
 
 [node name="ground" type="StaticBody2D" parent="."]
 position = Vector2(58, 441)
@@ -52,6 +46,3 @@ offset_left = 5.0
 offset_right = 191.0
 offset_bottom = 22.0
 metadata/_edit_use_anchors_ = true
-
-[node name="Node" type="Node" parent="."]
-script = ExtResource("2_ouf45")
