@@ -29,6 +29,7 @@ script = ExtResource("3_3i8no")
 
 [node name="Player" parent="." instance=ExtResource("1_l1x32")]
 position = Vector2(401, 433)
+coyote_time = 0.09
 
 [node name="Ground" type="StaticBody2D" parent="."]
 position = Vector2(400, 500)
@@ -80,7 +81,7 @@ shape = SubResource("RectangleShape2D_rj6kv")
 offset_left = 15.0
 offset_top = 15.0
 offset_right = 215.0
-offset_bottom = 115.0
+offset_bottom = 130.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
 
 [node name="DashCounterLabel" type="Label" parent="UI"]
@@ -103,6 +104,13 @@ offset_top = 80.0
 offset_right = 200.0
 offset_bottom = 106.0
 text = "Velocity: 0.0, 0.0"
+
+[node name="DashRechargeLabel" type="Label" parent="UI"]
+offset_left = 30.0
+offset_top = 105.0
+offset_right = 200.0
+offset_bottom = 131.0
+text = "Dash Recharge:"
 
 [node name="GiveBallButton" type="Button" parent="UI" groups=["buttons"]]
 offset_left = 230.0

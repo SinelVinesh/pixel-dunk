@@ -6,6 +6,7 @@ extends Node2D
 @onready var dash_counter_label = $UI/DashCounterLabel
 @onready var state_label = $UI/StateLabel
 @onready var velocity_label = $UI/VelocityLabel
+@onready var dash_recharge_label = $UI/DashRechargeLabel
 @onready var input_setup = $InputSetup
 
 func _ready():
@@ -42,6 +43,36 @@ func _update_ui():
 	# Update velocity
 	velocity_label.text = "Velocity: %.1f, %.1f" % [player.velocity.x, player.velocity.y]
 
+	# Update dash recharge text
+	update_dash_recharge_ui()
+
+# Update the dash recharge UI (text label only)
+func update_dash_recharge_ui():
+	# Get timer info
+	var timer = player.dash_cooldown_timer
+	var time_left = timer.time_left
+	var is_paused = timer.is_paused()
+
+	# Only show recharge if player is missing dashes
+	if player.dash_count < player.max_dash_count:
+		dash_recharge_label.visible = true
+
+		if time_left > 0:
+			# Format time remaining (1 decimal place)
+			var time_text = "%.1fs" % time_left
+
+			# Update label
+			if is_paused:
+				dash_recharge_label.text = "Dash Recharge: PAUSED (%s)" % time_text
+			else:
+				dash_recharge_label.text = "Dash Recharge: %s" % time_text
+		else:
+			# If timer isn't running but should be (waiting to start)
+			dash_recharge_label.text = "Dash Recharge: Waiting..."
+	else:
+		# Hide elements if player has full dash count
+		dash_recharge_label.visible = false
+
 func _on_player_dash_used(_player):
 	# Visual feedback when dash is used (could add screen shake, etc.)
 	pass
@@ -62,7 +93,7 @@ func _on_reset_button_pressed():
 	# Reset player position and state
 	player.position = Vector2(400, 300)
 	player.velocity = Vector2.ZERO
-	player.current_state = player.PlayerState.FREE
+	player.current_state = player.PlayerState.JUMPING
 	player.has_ball = false
 	player.reset_dash_count()
 

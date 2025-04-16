@@ -15,18 +15,20 @@ class_name Player
 @export var jump_force: float = 600.0
 ## Gravity force applied each frame when in air
 @export var gravity: float = 30.0
-## Maximum downward velocity to prevent excessive falling speed
+## Multiplier for gravity when rising, makes ascent faster or slower (1.0 = normal, lower = higher jumps)
+@export_range(0.5, 1.0, 0.05) var rise_gravity_multiplier: float = 0.8
+## Multiplier for gravity when falling, makes descent faster than ascent (1.0 = same speed, higher = fall faster)
+@export_range(1.0, 3.0, 0.1) var fall_gravity_multiplier: float = 1.6
+## Maximum downward velocity to prevent excessive falling speed (in pixels per second) | lower = faster fall (0 = no limit)
 @export var max_fall_speed: float = 1000.0
-## Time in seconds player can still jump after leaving a platform (coyote time)
+## Time in seconds player can still jump after leaving a platform
 @export_range(0.0, 0.3, 0.01) var coyote_time: float = 0.1
 
 @export_group("Double Jump")
 ## Whether double jumping is enabled for this player
 @export var double_jump_enabled: bool = true
-
 ## Force multiplier for double jump (relative to regular jump)
 @export_range(0.1, 1.5, 0.05) var double_jump_force_multiplier: float = 0.8
-
 ## Air control multiplier during double jump (lower = less control)
 @export_range(0.1, 1.0, 0.05) var double_jump_control_multiplier: float = 0.7
 
@@ -37,6 +39,8 @@ class_name Player
 @export var dash_duration: float = 0.2
 ## Maximum number of dashes before needing to recharge
 @export var max_dash_count: int = 3
+## Time in seconds to recharge one dash
+@export var dash_recharge_time: float = 2.0
 
 @export_group("Game")
 ## Maximum distance for passing the ball to teammates
@@ -52,7 +56,7 @@ enum PlayerState {
 	JUMPING,         # In the air after jumping (first jump)
 	DOUBLE_JUMPING   # In the air after a second jump
 }
-var current_state: int = PlayerState.FREE  # Current state of the player
+var current_state: int = PlayerState.JUMPING  # Current state of the player
 
 # Player status variables
 var has_ball: bool = false         # Whether the player is holding the ball
@@ -99,6 +103,9 @@ func _ready() -> void:
 	# Reset the dash count to maximum
 	reset_dash_count()
 
+	# Configure dash cooldown timer
+	dash_cooldown_timer.wait_time = dash_recharge_time
+
 	# Initialize ground tracking
 	was_on_ground = false
 	can_coyote_jump = false
@@ -128,6 +135,9 @@ func _physics_process(delta: float) -> void:
 			handle_jump(delta)
 		PlayerState.DOUBLE_JUMPING:
 			handle_double_jump(delta)
+
+	# Manage dash cooldown timer - pause when having the ball
+	manage_dash_cooldown()
 
 	# Apply movement and handle collisions
 	move_and_slide()
@@ -184,6 +194,18 @@ func get_input() -> void:
 	jump_pressed = Input.is_action_just_pressed("jump")
 	pass_pressed = Input.is_action_just_pressed("pass")
 
+# Apply gravity consistently based on vertical velocity
+func apply_gravity() -> void:
+	if velocity.y > 0:
+		# Falling - apply higher gravity
+		velocity.y += gravity * fall_gravity_multiplier
+	else:
+		# Rising - apply normal or reduced gravity based on rise_gravity_multiplier
+		velocity.y += gravity * rise_gravity_multiplier
+
+	# Clamp to maximum fall speed
+	velocity.y = min(velocity.y, max_fall_speed)
+
 # Handle movement when in the FREE state (not holding ball)
 func handle_free_movement(delta: float) -> void:
 	# Apply movement with acceleration if input is detected
@@ -191,9 +213,8 @@ func handle_free_movement(delta: float) -> void:
 		# For horizontal movement
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed, acceleration * delta)
 
-		# Only apply vertical movement component in air (important for wall jumps, etc)
-		if !on_ground:
-			velocity.y = lerp(velocity.y, move_direction.y * move_speed, acceleration * delta * 0.5)
+		# Remove ability to control vertical movement in the air
+		# This prevents "flying" in FREE state
 	else:
 		# Apply friction when not moving to slow down
 		velocity.x = velocity.x * friction
@@ -203,8 +224,7 @@ func handle_free_movement(delta: float) -> void:
 
 	# Apply gravity when in the air
 	if !on_ground:
-		velocity.y += gravity
-		velocity.y = min(velocity.y, max_fall_speed)
+		apply_gravity()
 
 	# Handle jumping (regular or coyote)
 	if jump_pressed:
@@ -245,8 +265,7 @@ func handle_ball_possession(delta: float) -> void:
 
 	# Apply gravity when in the air
 	if !on_ground:
-		velocity.y += gravity
-		velocity.y = min(velocity.y, max_fall_speed)
+		apply_gravity()
 
 	# Handle dashing if player has dash charges available
 	if dash_pressed and dash_count > 0:
@@ -288,8 +307,7 @@ func handle_jump(delta: float) -> void:
 		velocity.x = velocity.x * (friction + 0.05)
 
 	# Apply gravity
-	velocity.y += gravity
-	velocity.y = min(velocity.y, max_fall_speed)
+	apply_gravity()
 
 	# Handle double jump if available
 	if jump_pressed and can_double_jump and double_jump_enabled:
@@ -315,8 +333,7 @@ func handle_double_jump(delta: float) -> void:
 		velocity.x = velocity.x * (friction + 0.05)
 
 	# Apply gravity
-	velocity.y += gravity
-	velocity.y = min(velocity.y, max_fall_speed)
+	apply_gravity()
 
 	# Handle dash in air
 	if dash_pressed and dash_count > 0:
@@ -340,6 +357,11 @@ func start_dash() -> void:
 	in_dash = true  # Flag as currently dashing
 	current_state = PlayerState.DASHING  # Change to dashing state
 
+	# Start recharging if this is the first dash used
+	if dash_count == max_dash_count - 1:
+		dash_cooldown_timer.start()
+		###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
+
 	# Visual and audio feedback
 	dash_particles.emitting = true  # Start particle effect
 	dash_sound.play()  # Play sound effect
@@ -353,47 +375,47 @@ func reset_dash_count() -> void:
 	dash_count = max_dash_count
 	emit_signal("dash_recharged", self)
 
-# Handle picking up the ball
+# TODO Volahary - Handle picking up the ball
 func pick_up_ball(ball) -> void:
 	has_ball = true
 	current_state = PlayerState.BALL_POSSESSION
+	###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
+
 	# Note: Logic to attach ball to the player would go here
 	# ball.player_picked_up(self)
 
-# Pass the ball to a teammate
+# TODO Volahary - Pass the ball to a teammate
 func pass_ball() -> void:
 	if not has_ball:
 		return
 
 	# Find nearest teammate
 	var teammate = find_nearest_teammate()
+	has_ball = false
+	current_state = PlayerState.JUMPING
+
+	###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
+
+	# Play pass sound
+	pass_sound.play()
+
+	# Emit signal for the ball system to handle
 	if teammate:
-		# Change state back to free movement
-		has_ball = false
-		current_state = PlayerState.FREE
-
-		# Play pass sound
-		pass_sound.play()
-
-		# Reset dash count when passing
-		reset_dash_count()
-
-		# Emit signal for the ball system to handle
 		emit_signal("ball_passed", self, teammate.global_position, teammate)
 
-# Check for ball in pickup range
+# TODO Volahary - Check for ball in pickup range
 func check_for_ball():
 	# This would be implemented with area detection
 	# For now, return null as placeholder
 	return null
 
-# Find the nearest teammate for passing
+# TODO Abdoul - Find the nearest teammate for passing
 func find_nearest_teammate():
 	# This would find the nearest teammate player
 	# For now, return null as placeholder
 	return null
 
-# Find the position of the opponent's basket
+# TODO Steeven - Find the position of the opponent's basket
 func find_basket_position():
 	# This would find the opponent's basket position
 	# For now, return a placeholder position
@@ -420,6 +442,21 @@ func update_animations() -> void:
 	# Adjust animation speed based on movement speed
 	var speed_factor = clamp(velocity.length() / move_speed, 0.5, 2.0)
 	animation_player.speed_scale = speed_factor
+
+# Manage the dash cooldown timer based on ball possession
+func manage_dash_cooldown() -> void:
+	# Start the timer if it's not running and we need to recharge
+	if dash_count < max_dash_count and current_state != PlayerState.BALL_POSSESSION and !dash_cooldown_timer.is_paused() and !dash_cooldown_timer.time_left > 0:
+		dash_cooldown_timer.start()
+
+	# If player has ball, pause the timer
+	if has_ball:
+		if !dash_cooldown_timer.is_paused() and dash_cooldown_timer.time_left > 0:
+			dash_cooldown_timer.set_paused(true)
+	else:
+		# If player doesn't have ball, unpause the timer
+		if dash_cooldown_timer.is_paused():
+			dash_cooldown_timer.set_paused(false)
 
 # Called when the dash cooldown timer completes
 func _on_dash_cooldown_timer_timeout() -> void:
