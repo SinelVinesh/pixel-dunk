@@ -19,7 +19,7 @@ class_name Player
 @export_range(0.5, 1.0, 0.05) var rise_gravity_multiplier: float = 0.8
 ## Multiplier for gravity when falling, makes descent faster than ascent (1.0 = same speed, higher = fall faster)
 @export_range(1.0, 3.0, 0.1) var fall_gravity_multiplier: float = 1.4
-## Multiplier for gravity when holding the ball | lower = slower fall, more floaty (0.4 = slower fall, 1.0 = normal fall)
+## Multiplier for gravity when holding the ball | lower = slower fall, more floaty (0.4 = slower fall, 1.0 = normal rise or fall multiplier)
 @export_range(0.4, 1.0, 0.05) var holding_ball_gravity_multiplier: float = 0.6
 ## Maximum downward velocity to prevent excessive falling speed (in pixels per second) | lower = faster fall (0 = no limit)
 @export var max_fall_speed: float = 1000.0
