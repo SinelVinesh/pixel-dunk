@@ -1,0 +1,200 @@
+[gd_scene load_steps=7 format=3 uid="uid://dlaobnk15kjg0"]
+
+[ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="1_l1x32"]
+[ext_resource type="Script" uid="uid://c4a2kv7cbajpm" path="res://entities/player/PlayerTest.gd" id="1_tih6e"]
+[ext_resource type="Script" uid="uid://nt1t181hmdji" path="res://entities/player/InputSetup.gd" id="3_3i8no"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
+size = Vector2(800, 50)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_63b52"]
+bg_color = Color(0, 0, 0, 0.407843)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n2vy5"]
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="PlayerTest" type="Node2D"]
+script = ExtResource("1_tih6e")
+
+[node name="InputSetup" type="Node" parent="."]
+script = ExtResource("3_3i8no")
+
+[node name="Player" parent="." instance=ExtResource("1_l1x32")]
+position = Vector2(401, 433)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(400, 500)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Ground"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Platform1" type="StaticBody2D" parent="."]
+position = Vector2(200, 380)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Platform1"]
+offset_left = -75.0
+offset_top = -10.0
+offset_right = 75.0
+offset_bottom = 10.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
+scale = Vector2(0.2, 0.5)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(600, 380)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Platform2"]
+offset_left = -75.0
+offset_top = -10.0
+offset_right = 75.0
+offset_bottom = 10.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
+scale = Vector2(0.2, 0.5)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="UI"]
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 215.0
+offset_bottom = 115.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
+
+[node name="DashCounterLabel" type="Label" parent="UI"]
+offset_left = 30.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 56.0
+text = "Dash: 3/3"
+
+[node name="StateLabel" type="Label" parent="UI"]
+offset_left = 30.0
+offset_top = 55.0
+offset_right = 200.0
+offset_bottom = 81.0
+text = "State: Free"
+
+[node name="VelocityLabel" type="Label" parent="UI"]
+offset_left = 30.0
+offset_top = 80.0
+offset_right = 200.0
+offset_bottom = 106.0
+text = "Velocity: 0.0, 0.0"
+
+[node name="GiveBallButton" type="Button" parent="UI" groups=["buttons"]]
+offset_left = 230.0
+offset_top = 15.0
+offset_right = 330.0
+offset_bottom = 50.0
+text = "Give Ball to player"
+
+[node name="ResetButton" type="Button" parent="UI" groups=["buttons"]]
+offset_left = 230.0
+offset_top = 60.0
+offset_right = 330.0
+offset_bottom = 95.0
+text = "Reset"
+
+[node name="ControlsButton" type="Button" parent="UI" groups=["buttons"]]
+offset_left = 230.0
+offset_top = 105.0
+offset_right = 330.0
+offset_bottom = 140.0
+text = "Controls"
+
+[node name="ControlsPanel" type="Panel" parent="UI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -181.0
+offset_top = -309.0
+offset_right = 362.0
+offset_bottom = 145.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_n2vy5")
+
+[node name="Label" type="Label" parent="UI/ControlsPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -93.5
+offset_top = 20.0
+offset_right = 93.5
+offset_bottom = 46.0
+grow_horizontal = 2
+text = "CONTROLS"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="UI/ControlsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -104.0
+offset_right = 180.0
+offset_bottom = 126.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "KEYBOARD:
+Movement: ZQSD or Arrow Keys
+Jump: SPACE
+Dash: SHIFT
+Pass: E
+
+CONTROLLER:
+Movement: Left Stick or D-Pad
+Jump: A Button
+Dash: B Button
+Pass: X Button"
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="UI/ControlsPanel" groups=["buttons"]]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_top = -40.0
+offset_right = 50.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Close"
+
+[connection signal="pressed" from="UI/GiveBallButton" to="." method="_on_give_ball_button_pressed"]
+[connection signal="pressed" from="UI/ResetButton" to="." method="_on_reset_button_pressed"]
+[connection signal="pressed" from="UI/ControlsButton" to="." method="_on_controls_button_pressed"]
+[connection signal="pressed" from="UI/ControlsPanel/CloseButton" to="." method="_on_controls_button_pressed"]
