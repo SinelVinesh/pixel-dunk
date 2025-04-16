@@ -18,7 +18,9 @@ class_name Player
 ## Multiplier for gravity when rising, makes ascent faster or slower (1.0 = normal, lower = higher jumps)
 @export_range(0.5, 1.0, 0.05) var rise_gravity_multiplier: float = 0.8
 ## Multiplier for gravity when falling, makes descent faster than ascent (1.0 = same speed, higher = fall faster)
-@export_range(1.0, 3.0, 0.1) var fall_gravity_multiplier: float = 1.6
+@export_range(1.0, 3.0, 0.1) var fall_gravity_multiplier: float = 1.4
+## Multiplier for gravity when holding the ball | lower = slower fall, more floaty (0.4 = slower fall, 1.0 = normal fall)
+@export_range(0.4, 1.0, 0.05) var holding_ball_gravity_multiplier: float = 0.6
 ## Maximum downward velocity to prevent excessive falling speed (in pixels per second) | lower = faster fall (0 = no limit)
 @export var max_fall_speed: float = 1000.0
 ## Time in seconds player can still jump after leaving a platform
@@ -34,11 +36,11 @@ class_name Player
 
 @export_group("Dash")
 ## Speed multiplier when dashing
-@export var dash_force: float = 800.0
+@export var dash_force: float = 1000.0
 ## How long a dash lasts in seconds
-@export var dash_duration: float = 0.2
+@export var dash_duration: float = 0.3
 ## Maximum number of dashes before needing to recharge
-@export var max_dash_count: int = 3
+@export var max_dash_count: int = 2
 ## Time in seconds to recharge one dash
 @export var dash_recharge_time: float = 2.0
 
@@ -196,15 +198,28 @@ func get_input() -> void:
 
 # Apply gravity consistently based on vertical velocity
 func apply_gravity() -> void:
+	var gravity_modifier = 1.0
+
 	if velocity.y > 0:
 		# Falling - apply higher gravity
-		velocity.y += gravity * fall_gravity_multiplier
+		gravity_modifier = fall_gravity_multiplier
 	else:
-		# Rising - apply normal or reduced gravity based on rise_gravity_multiplier
-		velocity.y += gravity * rise_gravity_multiplier
+		# Rising - apply reduced gravity based on rise_gravity_multiplier
+		gravity_modifier = rise_gravity_multiplier
 
-	# Clamp to maximum fall speed
-	velocity.y = min(velocity.y, max_fall_speed)
+	# If player has ball, apply additional reduction
+	if has_ball:
+		gravity_modifier *= holding_ball_gravity_multiplier
+
+	# Apply gravity with appropriate modifiers
+	velocity.y += gravity * gravity_modifier
+
+	# Clamp to maximum fall speed (slower if holding ball)
+	var max_speed = max_fall_speed
+	if has_ball:
+		max_speed = max_fall_speed * holding_ball_gravity_multiplier
+
+	velocity.y = min(velocity.y, max_speed)
 
 # Handle movement when in the FREE state (not holding ball)
 func handle_free_movement(delta: float) -> void:
@@ -255,9 +270,9 @@ func perform_jump() -> void:
 
 # Handle movement when holding the ball (BALL_POSSESSION state)
 func handle_ball_possession(delta: float) -> void:
-	# When having the ball, movement is restricted
-	# Apply heavier friction to limit movement
-	velocity.x = velocity.x * friction * 1.2
+	# Movement is restricted to dashing only when having the ball
+	# Stop all horizontal movement with high friction
+	velocity.x = 0.0
 
 	# Only apply vertical friction when in the air
 	if !on_ground:
@@ -284,6 +299,9 @@ func handle_dash(delta: float) -> void:
 		# End dash when timer expires
 		in_dash = false
 		dash_particles.emitting = false
+
+		# Immediately stop all momentum when dash ends
+		velocity = Vector2.ZERO
 
 		# Return to appropriate state based on ball possession and ground state
 		if has_ball:
@@ -379,6 +397,10 @@ func reset_dash_count() -> void:
 func pick_up_ball(ball) -> void:
 	has_ball = true
 	current_state = PlayerState.BALL_POSSESSION
+
+	# Reset velocity when picking up the ball to prevent momentum carrying over
+	velocity = Vector2.ZERO
+
 	###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
 
 	# Note: Logic to attach ball to the player would go here
