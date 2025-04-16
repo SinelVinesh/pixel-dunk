@@ -175,8 +175,8 @@ Pass: E
 CONTROLLER:
 Movement: Left Stick or D-Pad
 Jump: A Button
-Dash: B Button
-Pass: X Button"
+Dash: LT (Left Trigger)
+Pass: RT (Right Trigger)"
 horizontal_alignment = 1
 
 [node name="CloseButton" type="Button" parent="UI/ControlsPanel" groups=["buttons"]]

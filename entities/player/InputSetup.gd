@@ -67,13 +67,13 @@ func setup_input_actions():
 	if not InputMap.has_action("dash"):
 		InputMap.add_action("dash")
 		add_keyboard_event_to_action("dash", KEY_SHIFT) # Shift key
-		add_joy_button_event_to_action("dash", JOY_BUTTON_B) # Xbox B button
+		add_joy_trigger_event_to_action("dash", JOY_AXIS_TRIGGER_LEFT) # Xbox LT button
 
 	# Pass - Pass the ball to a teammate
 	if not InputMap.has_action("pass"):
 		InputMap.add_action("pass")
 		add_keyboard_event_to_action("pass", KEY_E) # E key
-		add_joy_button_event_to_action("pass", JOY_BUTTON_X) # Xbox X button
+		add_joy_trigger_event_to_action("pass", JOY_AXIS_TRIGGER_RIGHT) # Xbox RT button
 
 	print("Pixel Dunk input actions have been set up successfully.")
 
@@ -104,4 +104,16 @@ func add_joy_axis_event_to_action(action_name: String, axis_index: int, axis_val
 	var event = InputEventJoypadMotion.new()
 	event.axis = axis_index
 	event.axis_value = axis_value
+	InputMap.action_add_event(action_name, event)
+
+# Adds a trigger event (LT/RT) to the specified action
+# Parameters:
+#   action_name: Name of the input action
+#   trigger_axis: Trigger axis index (JOY_AXIS_TRIGGER_LEFT or JOY_AXIS_TRIGGER_RIGHT)
+func add_joy_trigger_event_to_action(action_name: String, trigger_axis: int):
+	var event = InputEventJoypadMotion.new()
+	event.axis = trigger_axis
+	# Triggers in Godot use values from 0.0 (not pressed) to 1.0 (fully pressed)
+	# Setting to 0.5 means half-pressed will activate the action
+	event.axis_value = 0.5
 	InputMap.action_add_event(action_name, event)
