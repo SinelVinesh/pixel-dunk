@@ -43,8 +43,8 @@ class_name Player
 @export var max_dash_count: int = 2
 ## Time in seconds to recharge one dash
 @export var dash_recharge_time: float = 2.0
-## Only recharge dashes when player is on the ground
-@export var recharge_only_on_ground: bool = true
+## Pause dash recharge timer when player is in the air
+@export var pause_recharge_in_air: bool = true
 ## Pause the dash recharge timer when dashing
 @export var pause_recharge_when_dashing: bool = true
 ## Reset the dash recharge timer after a dash is used
@@ -381,13 +381,12 @@ func start_dash() -> void:
 	in_dash = true  # Flag as currently dashing
 	current_state = PlayerState.DASHING  # Change to dashing state
 
-	# Start recharging if this is the first dash used
-	if dash_count == max_dash_count - 1:
-		if reset_timer_after_dash:
-			# Reset the timer to full duration
-			dash_cooldown_timer.stop()
-
-		# Start the timer (will be managed by manage_dash_cooldown)
+	# Reset and start the dash cooldown timer
+	if dash_count == max_dash_count - 1 or reset_timer_after_dash:
+		# Reset the timer completely by stopping it
+		dash_cooldown_timer.stop()
+		# Start a new timer cycle
+		dash_cooldown_timer.wait_time = dash_recharge_time
 		dash_cooldown_timer.start()
 
 	# Visual and audio feedback
@@ -475,15 +474,12 @@ func update_animations() -> void:
 func manage_dash_cooldown() -> void:
 	# Determine if we should pause the timer based on configuration
 	var should_pause = false
-
-	# Check if we should pause while in the air (based on ground-only setting)
-	if recharge_only_on_ground and !on_ground:
+	# Check if we should pause while in the air
+	if pause_recharge_in_air and !on_ground:
 		should_pause = true
-
 	# Check if we should pause during dashing
 	if pause_recharge_when_dashing and current_state == PlayerState.DASHING:
 		should_pause = true
-
 	# Check if we should pause while having the ball
 	if has_ball:
 		should_pause = true
@@ -498,8 +494,6 @@ func manage_dash_cooldown() -> void:
 
 	# Start the timer if it's not running and we need to recharge
 	if dash_count < max_dash_count and !dash_cooldown_timer.is_paused() and !dash_cooldown_timer.time_left > 0:
-		# Only start the timer if we're in a valid state for recharging
-		# We don't need another ground check here since the pause logic already handles it
 		dash_cooldown_timer.start()
 
 # Called when the dash cooldown timer completes

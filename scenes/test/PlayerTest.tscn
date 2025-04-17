@@ -80,8 +80,8 @@ shape = SubResource("RectangleShape2D_rj6kv")
 [node name="Panel" type="Panel" parent="UI"]
 offset_left = 15.0
 offset_top = 15.0
-offset_right = 215.0
-offset_bottom = 130.0
+offset_right = 281.0
+offset_bottom = 142.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
 
 [node name="DashCounterLabel" type="Label" parent="UI"]
@@ -113,23 +113,23 @@ offset_bottom = 131.0
 text = "Dash Recharge:"
 
 [node name="GiveBallButton" type="Button" parent="UI" groups=["buttons"]]
-offset_left = 230.0
+offset_left = 300.0
 offset_top = 15.0
-offset_right = 330.0
+offset_right = 448.0
 offset_bottom = 50.0
 text = "Give Ball to player"
 
 [node name="ResetButton" type="Button" parent="UI" groups=["buttons"]]
-offset_left = 230.0
+offset_left = 300.0
 offset_top = 60.0
-offset_right = 330.0
+offset_right = 400.0
 offset_bottom = 95.0
 text = "Reset"
 
 [node name="ControlsButton" type="Button" parent="UI" groups=["buttons"]]
-offset_left = 230.0
+offset_left = 300.0
 offset_top = 105.0
-offset_right = 330.0
+offset_right = 400.0
 offset_bottom = 140.0
 text = "Controls"
 
