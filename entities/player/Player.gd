@@ -43,6 +43,12 @@ class_name Player
 @export var max_dash_count: int = 2
 ## Time in seconds to recharge one dash
 @export var dash_recharge_time: float = 2.0
+## Only recharge dashes when player is on the ground
+@export var recharge_only_on_ground: bool = true
+## Pause the dash recharge timer when dashing
+@export var pause_recharge_when_dashing: bool = true
+## Reset the dash recharge timer after a dash is used
+@export var reset_timer_after_dash: bool = true
 
 @export_group("Game")
 ## Maximum distance for passing the ball to teammates
@@ -377,8 +383,12 @@ func start_dash() -> void:
 
 	# Start recharging if this is the first dash used
 	if dash_count == max_dash_count - 1:
+		if reset_timer_after_dash:
+			# Reset the timer to full duration
+			dash_cooldown_timer.stop()
+
+		# Start the timer (will be managed by manage_dash_cooldown)
 		dash_cooldown_timer.start()
-		###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
 
 	# Visual and audio feedback
 	dash_particles.emitting = true  # Start particle effect
@@ -401,8 +411,6 @@ func pick_up_ball(ball) -> void:
 	# Reset velocity when picking up the ball to prevent momentum carrying over
 	velocity = Vector2.ZERO
 
-	###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
-
 	# Note: Logic to attach ball to the player would go here
 	# ball.player_picked_up(self)
 
@@ -415,8 +423,6 @@ func pass_ball() -> void:
 	var teammate = find_nearest_teammate()
 	has_ball = false
 	current_state = PlayerState.JUMPING
-
-	###! PS: Dash cooldown timer pause state is already managed in manage_dash_cooldown() - Abdoul
 
 	# Play pass sound
 	pass_sound.play()
@@ -465,20 +471,36 @@ func update_animations() -> void:
 	var speed_factor = clamp(velocity.length() / move_speed, 0.5, 2.0)
 	animation_player.speed_scale = speed_factor
 
-# Manage the dash cooldown timer based on ball possession
+# Manage the dash cooldown timer based on player state and options
 func manage_dash_cooldown() -> void:
-	# Start the timer if it's not running and we need to recharge
-	if dash_count < max_dash_count and current_state != PlayerState.BALL_POSSESSION and !dash_cooldown_timer.is_paused() and !dash_cooldown_timer.time_left > 0:
-		dash_cooldown_timer.start()
+	# Determine if we should pause the timer based on configuration
+	var should_pause = false
 
-	# If player has ball, pause the timer
+	# Check if we should pause while in the air (based on ground-only setting)
+	if recharge_only_on_ground and !on_ground:
+		should_pause = true
+
+	# Check if we should pause during dashing
+	if pause_recharge_when_dashing and current_state == PlayerState.DASHING:
+		should_pause = true
+
+	# Check if we should pause while having the ball
 	if has_ball:
+		should_pause = true
+
+	# Handle timer pause/unpause based on conditions
+	if should_pause:
 		if !dash_cooldown_timer.is_paused() and dash_cooldown_timer.time_left > 0:
 			dash_cooldown_timer.set_paused(true)
 	else:
-		# If player doesn't have ball, unpause the timer
 		if dash_cooldown_timer.is_paused():
 			dash_cooldown_timer.set_paused(false)
+
+	# Start the timer if it's not running and we need to recharge
+	if dash_count < max_dash_count and !dash_cooldown_timer.is_paused() and !dash_cooldown_timer.time_left > 0:
+		# Only start the timer if we're in a valid state for recharging
+		# We don't need another ground check here since the pause logic already handles it
+		dash_cooldown_timer.start()
 
 # Called when the dash cooldown timer completes
 func _on_dash_cooldown_timer_timeout() -> void:
