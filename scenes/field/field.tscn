@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3 uid="uid://jfb05w7hm3wa"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ouf45"]
+size = Vector2(1038, 38)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jbjdo"]
+size = Vector2(187.5, 22)
+
+[node name="Field" type="Node2D"]
+
+[node name="ground" type="StaticBody2D" parent="."]
+position = Vector2(58, 441)
+
+[node name="ColorRect" type="ColorRect" parent="ground"]
+offset_left = 3.0
+offset_right = 1042.0
+offset_bottom = 40.0
+metadata/_edit_use_anchors_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ground"]
+position = Vector2(522, 20)
+shape = SubResource("RectangleShape2D_ouf45")
+
+[node name="plateform" type="StaticBody2D" parent="."]
+position = Vector2(174, 350)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="plateform"]
+position = Vector2(98, 11)
+shape = SubResource("RectangleShape2D_jbjdo")
+
+[node name="ColorRect" type="ColorRect" parent="plateform"]
+offset_left = 5.0
+offset_right = 191.0
+offset_bottom = 22.0
+metadata/_edit_use_anchors_ = true
+
+[node name="plateform2" type="StaticBody2D" parent="."]
+position = Vector2(741, 350)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="plateform2"]
+position = Vector2(98, 11)
+shape = SubResource("RectangleShape2D_jbjdo")
+
+[node name="ColorRect" type="ColorRect" parent="plateform2"]
+offset_left = 5.0
+offset_right = 191.0
+offset_bottom = 22.0
+metadata/_edit_use_anchors_ = true

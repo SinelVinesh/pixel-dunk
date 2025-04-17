@@ -61,3 +61,6 @@ builds/
 exports/
 [Bb]in/
 [Ee]xports/
+.vscode
+
+project.godot
