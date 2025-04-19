@@ -4,14 +4,63 @@
 # Godot-specific ignores
 .import/
 export.cfg
+export_presets.cfg
 export_credentials.cfg
 
 # Imported translations (automatically generated from CSV files)
 *.translation
+
+# Binaries
+*.o
+*.os
+*.so
+*.obj
+*.bc
+*.pyc
+*.dblite
+*.pdb
+*.lib
+*.exp
+*.exe
+*.dll
+*.ilk
+*.a
+
+# Build and external tools
+.sconsign.dblite
+.vs/
+.vscode/
+*.sln
+*.vcxproj*
+*.suo
+*.csproj
 
 # Mono-specific ignores
 .mono/
 data_*/
 mono_crash.*.json
 
+# Debug/logs and cache
+logs/
+*.log
+*.tmp
+*.bak
+*.backup
+*.swp
+.DS_Store
+*.blend1
+*.blend2
+
+# Project-specific ignores
+.cursor/
+memory-bank/
+
+# Build exports
+dist/
+builds/
+exports/
+[Bb]in/
+[Ee]xports/
 .vscode
+
+project.godot
