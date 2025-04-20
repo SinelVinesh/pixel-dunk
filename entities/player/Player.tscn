@@ -1,7 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://brkjmox0e57rp"]
+[gd_scene load_steps=14 format=3 uid="uid://brkjmox0e57rp"]
 
 [ext_resource type="Script" uid="uid://bxiljfe3xbh0m" path="res://entities/player/Player.gd" id="1_hqtht"]
-[ext_resource type="Script" path="res://entities/player/PlayerSprite.gd" id="2_qh4bd"]
+[ext_resource type="Script" uid="uid://cd16gohwdyu8l" path="res://entities/player/PlayerSprite.gd" id="2_qh4bd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_64wtt"]
 size = Vector2(32, 48)
@@ -129,13 +129,14 @@ _data = {
 &"run": SubResource("Animation_v6n7s")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_453mm"]
+
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 13
 script = ExtResource("1_hqtht")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -0.222473)
 script = ExtResource("2_qh4bd")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -174,5 +175,13 @@ volume_db = -10.0
 libraries = {
 &"": SubResource("AnimationLibrary_i25lq")
 }
+
+[node name="Check_Ball_A2D" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+
+[node name="Check_Ball_CS2D" type="CollisionShape2D" parent="Check_Ball_A2D"]
+scale = Vector2(1.85, 2.65)
+shape = SubResource("RectangleShape2D_453mm")
 
 [connection signal="timeout" from="DashCooldownTimer" to="." method="_on_dash_cooldown_timer_timeout"]

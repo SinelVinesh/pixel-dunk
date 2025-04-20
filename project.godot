@@ -15,6 +15,10 @@ run/main_scene="uid://dlaobnk15kjg0"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"
 
+[layer_names]
+
+2d_physics/layer_5="Ball"
+
 [rendering]
 
 renderer/rendering_method="mobile"

@@ -83,8 +83,7 @@ func _on_player_dash_recharged(_player):
 
 func _on_give_ball_button_pressed():
 	# Test function to simulate player picking up the ball
-	player.has_ball = true
-	player.current_state = player.PlayerState.BALL_POSSESSION
+	player.pick_up_ball(get_node("Ball"))
 
 	# Clear focus from the button to prevent space bar from re-triggering it
 	release_button_focus()

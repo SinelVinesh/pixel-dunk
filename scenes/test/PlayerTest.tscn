@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://dlaobnk15kjg0"]
+[gd_scene load_steps=8 format=3 uid="uid://dlaobnk15kjg0"]
 
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="1_l1x32"]
 [ext_resource type="Script" uid="uid://c4a2kv7cbajpm" path="res://entities/player/PlayerTest.gd" id="1_tih6e"]
 [ext_resource type="Script" uid="uid://nt1t181hmdji" path="res://entities/player/InputSetup.gd" id="3_3i8no"]
+[ext_resource type="PackedScene" uid="uid://doji7rrej3i4x" path="res://entities/ball/Ball.tscn" id="4_ojedb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(800, 50)
@@ -32,7 +33,8 @@ position = Vector2(401, 433)
 coyote_time = 0.09
 
 [node name="Ground" type="StaticBody2D" parent="."]
-position = Vector2(400, 500)
+position = Vector2(580, 500)
+scale = Vector2(1.465, 1)
 collision_layer = 9
 collision_mask = 0
 
@@ -43,6 +45,51 @@ offset_right = 400.0
 offset_bottom = 25.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(580, -27)
+scale = Vector2(1.465, 1)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Ceiling"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Wall1" type="StaticBody2D" parent="."]
+position = Vector2(-304, 323)
+scale = Vector2(0.759999, 14.04)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Wall1"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall1"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Wall2" type="StaticBody2D" parent="."]
+position = Vector2(1457, 323)
+scale = Vector2(0.759999, 14.04)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Wall2"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall2"]
 shape = SubResource("RectangleShape2D_rj6kv")
 
 [node name="Platform1" type="StaticBody2D" parent="."]
@@ -61,7 +108,7 @@ scale = Vector2(0.2, 0.5)
 shape = SubResource("RectangleShape2D_rj6kv")
 
 [node name="Platform2" type="StaticBody2D" parent="."]
-position = Vector2(600, 380)
+position = Vector2(950, 380)
 collision_layer = 9
 collision_mask = 0
 
@@ -201,6 +248,9 @@ offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "Close"
+
+[node name="Ball" parent="." instance=ExtResource("4_ojedb")]
+position = Vector2(578, 262)
 
 [connection signal="pressed" from="UI/GiveBallButton" to="." method="_on_give_ball_button_pressed"]
 [connection signal="pressed" from="UI/ResetButton" to="." method="_on_reset_button_pressed"]
