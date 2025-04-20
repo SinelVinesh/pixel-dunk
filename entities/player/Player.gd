@@ -82,9 +82,10 @@ var can_coyote_jump: bool = false  # Whether player can use coyote jump
 @onready var sprite: Sprite2D = $Sprite2D  # Player's visual sprite
 @onready var ground_check: RayCast2D = $GroundCheck  # Ray for detecting ground
 @onready var dash_particles: GPUParticles2D = $DashParticles  # Particle effect for dashing
-@onready var ball_position: Marker2D = $BallPosition  # Position where ball appears when held
+@onready var ball_position: Marker2D = $Node_Flipper/BallPosition  # Position where ball appears when held
 @onready var dash_cooldown_timer: Timer = $DashCooldownTimer  # Timer for recharging dashes
 @onready var animation_player: AnimationPlayer = $AnimationPlayer  # Controls animations
+@onready var node_flipper : Node2D = $Node_Flipper # Used to flip its child nodes
 
 # Sound effect nodes
 @onready var jump_sound: AudioStreamPlayer = $JumpSound  # Sound when jumping
@@ -97,6 +98,9 @@ var looking_direction: Vector2 = Vector2.RIGHT  # Direction player is facing
 var dash_pressed: bool = false  # Whether dash button was just pressed
 var jump_pressed: bool = false  # Whether jump button was just pressed
 var pass_pressed: bool = false  # Whether pass button was just pressed
+
+# Used to store the ball reference
+var ball
 
 # Signals - Events that other nodes can connect to
 signal ball_passed(source_player, target_position, target_player)  # Emitted when passing the ball
@@ -152,6 +156,12 @@ func _physics_process(delta: float) -> void:
 
 	# Update animations based on state and movement
 	update_animations()
+
+	# Attach ball if has ball, else, do nothing
+	_manage_ball_attachment(ball)
+
+	# Update some nodes transform to flip according to looking direction
+	_handle_transform_flip()
 
 # Update coyote time system
 func update_coyote_time(delta: float) -> void:
@@ -261,11 +271,6 @@ func handle_free_movement(delta: float) -> void:
 	if dash_pressed and dash_count > 0:
 		start_dash()
 
-	# Check for ball pickup
-	var ball = check_for_ball()
-	if ball:
-		pick_up_ball(ball)
-
 # Perform a jump (shared logic for regular and coyote jumps)
 func perform_jump() -> void:
 	velocity.y = -jump_force
@@ -273,6 +278,13 @@ func perform_jump() -> void:
 	current_state = PlayerState.JUMPING
 	can_double_jump = double_jump_enabled
 	can_coyote_jump = false  # Use up coyote jump
+
+# Perform a double jump
+func _perform_double_jump() -> void:
+	velocity.y = -jump_force * double_jump_force_multiplier  # Use configurable multiplier
+	jump_sound.play()
+	current_state = PlayerState.DOUBLE_JUMPING
+	can_double_jump = false
 
 # Handle movement when holding the ball (BALL_POSSESSION state)
 func handle_ball_possession(delta: float) -> void:
@@ -294,7 +306,14 @@ func handle_ball_possession(delta: float) -> void:
 
 	# Handle passing the ball to teammates
 	if pass_pressed:
-		pass_ball()
+		pass_ball(ball)
+	
+	if jump_pressed:
+		if on_ground:
+			perform_jump()
+		else:
+			_perform_double_jump()
+			pass
 
 # Handle behavior during a dash (DASHING state)
 func handle_dash(delta: float) -> void:
@@ -321,10 +340,14 @@ func handle_dash(delta: float) -> void:
 		# Apply constant velocity in dash direction
 		velocity = dash_direction * dash_force
 
+	# If pass pressed
+	if pass_pressed:
+		pass_ball(ball)
+
 # Handle behavior during a jump (JUMPING state)
 func handle_jump(delta: float) -> void:
 	# Apply horizontal movement with reduced control in air
-	if move_direction.length() > 0.1:
+	if move_direction.length() > 0.1 and not has_ball:
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed, acceleration * delta * 0.8)
 	else:
 		# Apply air friction (slightly reduced)
@@ -335,10 +358,7 @@ func handle_jump(delta: float) -> void:
 
 	# Handle double jump if available
 	if jump_pressed and can_double_jump and double_jump_enabled:
-		velocity.y = -jump_force * double_jump_force_multiplier  # Use configurable multiplier
-		jump_sound.play()
-		current_state = PlayerState.DOUBLE_JUMPING
-		can_double_jump = false
+		_perform_double_jump()
 
 	# Handle dash in air
 	if dash_pressed and dash_count > 0:
@@ -346,12 +366,19 @@ func handle_jump(delta: float) -> void:
 
 	# Transition back to free state when landing
 	if on_ground:
-		current_state = PlayerState.FREE
+		if  not has_ball:
+			current_state = PlayerState.FREE
+		else:
+			current_state = PlayerState.BALL_POSSESSION
+
+	# If pass pressed
+	if pass_pressed:
+		pass_ball(ball)
 
 # Handle behavior during a double jump (DOUBLE_JUMPING state)
 func handle_double_jump(delta: float) -> void:
 	# Similar to regular jump, but with even less control using the configurable multiplier
-	if move_direction.length() > 0.1:
+	if move_direction.length() > 0.1 and not has_ball:
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed, acceleration * delta * double_jump_control_multiplier)
 	else:
 		velocity.x = velocity.x * (friction + 0.05)
@@ -365,7 +392,14 @@ func handle_double_jump(delta: float) -> void:
 
 	# Transition back to free state when landing
 	if on_ground:
-		current_state = PlayerState.FREE
+		if  not has_ball:
+			current_state = PlayerState.FREE
+		else:
+			current_state = PlayerState.BALL_POSSESSION
+
+	# If pass pressed
+	if pass_pressed:
+		pass_ball(ball)
 
 # Start a dash - used by multiple states
 func start_dash() -> void:
@@ -402,21 +436,35 @@ func reset_dash_count() -> void:
 	dash_count = max_dash_count
 	emit_signal("dash_recharged", self)
 
-# TODO Volahary - Handle picking up the ball
+# DONE Volahary - Handle picking up the ball
 func pick_up_ball(ball) -> void:
+
+	#Set has ball
 	has_ball = true
+
+	# Change state
 	current_state = PlayerState.BALL_POSSESSION
 
 	# Reset velocity when picking up the ball to prevent momentum carrying over
 	velocity = Vector2.ZERO
 
 	# Note: Logic to attach ball to the player would go here
-	# ball.player_picked_up(self)
+	# Attach ball
+	ball._handle_freeze(true, self)
 
-# TODO Volahary - Pass the ball to a teammate
-func pass_ball() -> void:
+# DONE Volahary - Pass the ball to a teammate - Almost now i need to launch it in desired direction
+func pass_ball(ball) -> void:
+
+	# Do nothing if has no ball
 	if not has_ball:
 		return
+	else:
+		#Set has no ball
+		has_ball = false
+		pass
+
+	# Detach ball
+		ball._handle_freeze(false, self)
 
 	# Find nearest teammate
 	var teammate = find_nearest_teammate()
@@ -430,11 +478,22 @@ func pass_ball() -> void:
 	if teammate:
 		emit_signal("ball_passed", self, teammate.global_position, teammate)
 
-# TODO Volahary - Check for ball in pickup range
-func check_for_ball():
+# DONE Volahary - Check for ball in pickup range
+func check_for_ball(area):
 	# This would be implemented with area detection
-	# For now, return null as placeholder
-	return null
+	pass
+	
+	# Check if the area owner is a ball, if yes, pick up ball
+	if area.owner == get_parent().get_node("Ball"):
+		pass
+		#print("Got the ball") # For debug
+	
+		# Set ball value
+		ball = area.owner
+	
+		# Pick up ball
+		pick_up_ball(ball)
+		
 
 # TODO Abdoul - Find the nearest teammate for passing
 func find_nearest_teammate():
@@ -506,3 +565,26 @@ func _on_dash_cooldown_timer_timeout() -> void:
 	# Continue timer if not at max dashes
 	if dash_count < max_dash_count:
 		dash_cooldown_timer.start()  # Continue recharging
+
+	# Called when an area 2d enters check ball area 2d
+func _on_check_ball_a_2d_area_entered(area: Area2D) -> void:
+	pass
+
+	# Check if the area owner is the ball
+	check_for_ball(area)
+	#print ("check for ball") # For debug
+
+	# Handle ball attachment
+func _manage_ball_attachment(ball):
+	if has_ball and ball != null:
+		ball.global_position = ball_position.global_position # Attach ball
+	else:
+		pass
+
+	# Used to "flip" transform of desired nodes, just add them
+func _handle_transform_flip():
+	pass
+	if velocity.x < 0: # Turn to face left
+		node_flipper.scale.x = abs(node_flipper.scale.x) * -1
+	elif velocity.x > 0: # Turn to face right
+		node_flipper.scale.x = abs(node_flipper.scale.x)

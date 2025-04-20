@@ -12,8 +12,12 @@ class_name Ball
 @onready var ball_rotation: float = rotation #Store ball default rotation
 @onready var ball_radius: float = $CollisionShape2D.shape.radius #Store ball radius
 @onready var bounce_sound = $BounceSound #Store bounce sfx node
+@onready var default_gravity_scale = get_gravity_scale() # Store default gravity scale
+@onready var ball_area : Area2D = $Area2D # Store ball area 2D node
+
 var last_state: PhysicsDirectBodyState2D #State that contains contact collision infos
-var min_velocity : float
+var min_velocity : float # Minimum velocity to apply bounce vfx / sfx
+var ball_handler # Node for the player currently holding the ball
 
 
 #On ball spawn
@@ -53,4 +57,33 @@ func _on_body_entered(body: Node) -> void:
 #Called each physic simulation
 func _integrate_forces(state):
 	last_state = state #Store state in last state
+
+# Handle activate / deactivate ball collision and gravity when picked up / passed
+func _handle_freeze(condition : bool, handler):
+	if condition:
+		set_contact_monitor(false) # Disable contact monitor
+		linear_velocity = Vector2.ZERO # Stop current ball movement
+		set_collision_layer_value(5, false) # Set no collision layer
 	
+		# Set no monitoring and not monitorable for ball area 2d
+		ball_area.set_monitoring(false)
+		ball_area.set_monitorable(false)
+	
+		## Old code
+		#freeze = true # Stop ball
+		#set_deferred("process_mode", Node.PROCESS_MODE_DISABLED) #Stop ball physic simulation
+		ball_handler = handler # Set ball handler to current player who has ball
+		#print(ball_handler.name) # For debug
+	else:
+		pass
+		set_contact_monitor(true) # Enable contact monitor
+		set_collision_layer_value(5, true) # Set enabled collision layer
+		# Set monitoring and monitorable for ball area 2d
+		ball_area.set_monitoring(true)
+		ball_area.set_monitorable(true)
+		linear_velocity = Vector2.ZERO # Stop current ball movement
+	
+		## Old code
+		#freeze = false # No more stop ball
+		#set_deferred("process_mode", Node.PROCESS_MODE_INHERIT) # Begin ball physic simulation
+		ball_handler = null # Clear ball handler

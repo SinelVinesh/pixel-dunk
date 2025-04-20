@@ -8,6 +8,7 @@ extends Node2D
 @onready var velocity_label = $UI/VelocityLabel
 @onready var dash_recharge_label = $UI/DashRechargeLabel
 @onready var input_setup = $InputSetup
+@onready var ball = $Ball
 
 func _ready():
 	# Connect player signals
@@ -95,6 +96,18 @@ func _on_reset_button_pressed():
 	player.current_state = player.PlayerState.JUMPING
 	player.has_ball = false
 	player.reset_dash_count()
+
+	# Reset ball position and state
+
+	## Old code
+	#ball._handle_freeze(false, player)
+	ball.position = Vector2(578, 262)
+	ball.set_contact_monitor(true) # Enable contact monitor
+	ball.set_collision_layer_value(5, true) # Set enabled collision layer
+	# Set monitoring and monitorable for ball area 2d
+	ball.ball_area.set_monitoring(true)
+	ball.ball_area.set_monitorable(true)
+	ball.linear_velocity = Vector2.ZERO # Stop current ball movement
 
 	# Clear focus from the button to prevent space bar from re-triggering it
 	release_button_focus()
