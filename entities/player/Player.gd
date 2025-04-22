@@ -20,7 +20,7 @@ class_name Player
 ## Multiplier for gravity when falling, makes descent faster than ascent (1.0 = same speed, higher = fall faster)
 @export_range(1.0, 3.0, 0.1) var fall_gravity_multiplier: float = 1.4
 ## Multiplier for gravity when holding the ball | lower = slower fall, more floaty (0.4 = slower fall, 1.0 = normal rise or fall multiplier)
-@export_range(0.4, 1.0, 0.05) var holding_ball_gravity_multiplier: float = 0.6
+@export_range(0.4, 1.0, 0.05) var holding_ball_gravity_multiplier: float = 0.7
 ## Maximum downward velocity to prevent excessive falling speed (in pixels per second) | lower = faster fall (0 = no limit)
 @export var max_fall_speed: float = 1000.0
 ## Time in seconds player can still jump after leaving a platform
@@ -77,6 +77,7 @@ var dash_direction: Vector2 = Vector2.ZERO  # Direction of the current dash
 var dash_timer: float = 0.0        # Time remaining in the current dash
 var coyote_timer: float = 0.0      # Timer for coyote time (jumping after falling)
 var can_coyote_jump: bool = false  # Whether player can use coyote jump
+var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player from flying when the dashing diagonally or upwards, change the method if you find a better solution - Abdoul
 
 # Node references - Links to child nodes in the scene
 @onready var sprite: Sprite2D = $Sprite2D  # Player's visual sprite
@@ -117,6 +118,10 @@ func _ready() -> void:
 
 	# Configure dash cooldown timer
 	dash_cooldown_timer.wait_time = dash_recharge_time
+
+	# Initialize dash state
+	in_dash = false
+	dash_timer = 0.0
 
 	# Initialize ground tracking
 	was_on_ground = false
@@ -289,8 +294,9 @@ func _perform_double_jump() -> void:
 # Handle movement when holding the ball (BALL_POSSESSION state)
 func handle_ball_possession(delta: float) -> void:
 	# Movement is restricted to dashing only when having the ball
-	# Stop all horizontal movement with high friction
-	velocity.x = 0.0
+	# Only apply friction when not in a dash or immediately after a dash
+	if not in_dash and (dash_timer <= 0 or not preserve_dash_momentum_with_ball):
+		velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
 
 	# Only apply vertical friction when in the air
 	if !on_ground:
@@ -307,7 +313,7 @@ func handle_ball_possession(delta: float) -> void:
 	# Handle passing the ball to teammates
 	if pass_pressed:
 		pass_ball(ball)
-	
+
 	if jump_pressed:
 		if on_ground:
 			perform_jump()
@@ -325,8 +331,9 @@ func handle_dash(delta: float) -> void:
 		in_dash = false
 		dash_particles.emitting = false
 
-		# Immediately stop all momentum when dash ends
-		velocity = Vector2.ZERO
+		# Reset momentum based on configuration and ball possession
+		if not has_ball or not preserve_dash_momentum_with_ball:
+			velocity = Vector2.ZERO
 
 		# Return to appropriate state based on ball possession and ground state
 		if has_ball:
@@ -339,6 +346,13 @@ func handle_dash(delta: float) -> void:
 	else:
 		# Apply constant velocity in dash direction
 		velocity = dash_direction * dash_force
+
+		# Apply gravity during dash to ensure consistent behavior for vertical dashes
+		# This allows upward/diagonal dashes to naturally arc down
+		if !on_ground:
+			apply_gravity()
+
+		# PS: Handle picking up the ball during dash is done in the pick_up_ball() function
 
 	# If pass pressed
 	if pass_pressed:
@@ -436,23 +450,24 @@ func reset_dash_count() -> void:
 	dash_count = max_dash_count
 	emit_signal("dash_recharged", self)
 
-# DONE Volahary - Handle picking up the ball
+# Handle picking up the ball
 func pick_up_ball(ball) -> void:
-
-	#Set has ball
+	# Set has ball
 	has_ball = true
 
-	# Change state
-	current_state = PlayerState.BALL_POSSESSION
+	# If dashing, remain in dash state and let it finish naturally
+	if current_state == PlayerState.DASHING:
+		# Stay in DASHING state to complete the dash
+		# The dash will transition to BALL_POSSESSION state when it ends naturally
+		pass
+	else:
+		# If not dashing, switch directly to ball possession
+		current_state = PlayerState.BALL_POSSESSION
 
-	# Reset velocity when picking up the ball to prevent momentum carrying over
-	velocity = Vector2.ZERO
-
-	# Note: Logic to attach ball to the player would go here
 	# Attach ball
 	ball._handle_freeze(true, self)
 
-# DONE Volahary - Pass the ball to a teammate - Almost now i need to launch it in desired direction
+# Pass the ball to a teammate - Almost now i need to launch it in desired direction
 func pass_ball(ball) -> void:
 
 	# Do nothing if has no ball
@@ -478,34 +493,22 @@ func pass_ball(ball) -> void:
 	if teammate:
 		emit_signal("ball_passed", self, teammate.global_position, teammate)
 
-# DONE Volahary - Check for ball in pickup range
+# Check for ball in pickup range
 func check_for_ball(area):
-	# This would be implemented with area detection
-	pass
-	
 	# Check if the area owner is a ball, if yes, pick up ball
 	if area.owner == get_parent().get_node("Ball"):
-		pass
-		#print("Got the ball") # For debug
-	
-		# Set ball value
+		# Store ball reference
 		ball = area.owner
-	
-		# Pick up ball
+
+		# Pick up ball - this will handle proper state transition
+		# regardless of current state (including while dashing)
 		pick_up_ball(ball)
-		
 
 # TODO Abdoul - Find the nearest teammate for passing
 func find_nearest_teammate():
 	# This would find the nearest teammate player
 	# For now, return null as placeholder
 	return null
-
-# TODO Steeven - Find the position of the opponent's basket
-func find_basket_position():
-	# This would find the opponent's basket position
-	# For now, return a placeholder position
-	return Vector2(1000, 300)  # Example basket position
 
 # Update animations based on state and movement
 func update_animations() -> void:

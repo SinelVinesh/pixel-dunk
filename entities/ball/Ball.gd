@@ -23,7 +23,7 @@ var ball_handler # Node for the player currently holding the ball
 #On ball spawn
 func _ready() -> void:
 	pass
-	
+
 	#Initially launch ball to the right
 	#linear_velocity = Vector2(300, -0) #For test
 
@@ -34,16 +34,16 @@ func _process(delta: float) -> void:
 #Called each time collides with a body
 func _on_body_entered(body: Node) -> void:
 	pass
-	
+
 	#Apply speed loss on bounce
 	linear_velocity = linear_velocity.normalized() * linear_velocity.length() * bounce_speed_loss
 
 	#Reduces volume according to max current linear velocity (x or y)
 	bounce_sound.volume_db = linear_to_db((((max(abs(linear_velocity.x), abs(linear_velocity.y))) - min_velocity) / 450) * 2) #Normalize current highest linear velocity between x or y into 0 - 2
-	
+
 	#Play bounce sfx
 	bounce_sound.play()
-	
+
 	#Spawn bounce vfx to contact location
 	if abs(linear_velocity.x) > (min_velocity * 5) or abs(linear_velocity.y) > (min_velocity * 5):
 		for i in range(last_state.get_contact_count()): #Get state infos for each contact
@@ -62,13 +62,16 @@ func _integrate_forces(state):
 func _handle_freeze(condition : bool, handler):
 	if condition:
 		set_contact_monitor(false) # Disable contact monitor
-		linear_velocity = Vector2.ZERO # Stop current ball movement
+
+		# Abdoul - I removed zeroing velocity to make sure to preserve player momentum
+		## Old code: linear_velocity = Vector2.ZERO # Stop current ball movement
+
 		set_collision_layer_value(5, false) # Set no collision layer
-	
+
 		# Set no monitoring and not monitorable for ball area 2d
 		ball_area.set_monitoring(false)
 		ball_area.set_monitorable(false)
-	
+
 		## Old code
 		#freeze = true # Stop ball
 		#set_deferred("process_mode", Node.PROCESS_MODE_DISABLED) #Stop ball physic simulation
@@ -82,7 +85,7 @@ func _handle_freeze(condition : bool, handler):
 		ball_area.set_monitoring(true)
 		ball_area.set_monitorable(true)
 		linear_velocity = Vector2.ZERO # Stop current ball movement
-	
+
 		## Old code
 		#freeze = false # No more stop ball
 		#set_deferred("process_mode", Node.PROCESS_MODE_INHERIT) # Begin ball physic simulation
