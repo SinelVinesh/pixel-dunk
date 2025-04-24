@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3 uid="uid://brkjmox0e57rp"]
 
 [ext_resource type="Script" uid="uid://bxiljfe3xbh0m" path="res://entities/player/Player.gd" id="1_hqtht"]
-[ext_resource type="Script" path="res://entities/player/PlayerSprite.gd" id="2_qh4bd"]
+[ext_resource type="Script" uid="uid://cd16gohwdyu8l" path="res://entities/player/PlayerSprite.gd" id="2_qh4bd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_64wtt"]
 size = Vector2(32, 48)
@@ -135,7 +135,6 @@ collision_mask = 13
 script = ExtResource("1_hqtht")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -0.222473)
 script = ExtResource("2_qh4bd")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -153,9 +152,6 @@ lifetime = 0.3
 explosiveness = 0.1
 randomness = 0.2
 process_material = SubResource("ParticleProcessMaterial_dkbkh")
-
-[node name="BallPosition" type="Marker2D" parent="."]
-position = Vector2(20, 0)
 
 [node name="DashCooldownTimer" type="Timer" parent="."]
 wait_time = 1.5
@@ -175,4 +171,18 @@ libraries = {
 &"": SubResource("AnimationLibrary_i25lq")
 }
 
+[node name="Check_Ball_A2D" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+
+[node name="Check_Ball_CS2D" type="CollisionShape2D" parent="Check_Ball_A2D"]
+scale = Vector2(1.125, 1.125)
+shape = SubResource("RectangleShape2D_64wtt")
+
+[node name="Node_Flipper" type="Node2D" parent="."]
+
+[node name="BallPosition" type="Marker2D" parent="Node_Flipper"]
+position = Vector2(20, 0)
+
 [connection signal="timeout" from="DashCooldownTimer" to="." method="_on_dash_cooldown_timer_timeout"]
+[connection signal="area_entered" from="Check_Ball_A2D" to="." method="_on_check_ball_a_2d_area_entered"]

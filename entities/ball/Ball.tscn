@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://doji7rrej3i4x"]
+
+[ext_resource type="Texture2D" uid="uid://b13vgahdymses" path="res://entities/ball/placeholder_ball.png" id="1_0ww54"]
+[ext_resource type="PhysicsMaterial" uid="uid://dlo5nwpjj10pb" path="res://entities/ball/Ball_PhysicMaterial.tres" id="1_aufmo"]
+[ext_resource type="Script" uid="uid://cpea8qm7hjqhn" path="res://entities/ball/Ball.gd" id="1_i2hml"]
+[ext_resource type="PackedScene" uid="uid://cf1foc2o05qwe" path="res://entities/ball/Bounce_particle_fx.tscn" id="3_vg0av"]
+[ext_resource type="AudioStream" uid="uid://k3r0wh773fvt" path="res://entities/ball/Ball_Bounce_01.wav" id="4_136jm"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0ww54"]
+
+[node name="Ball" type="RigidBody2D"]
+collision_layer = 16
+collision_mask = 28
+mass = 0.595
+physics_material_override = ExtResource("1_aufmo")
+can_sleep = false
+contact_monitor = true
+max_contacts_reported = 5
+script = ExtResource("1_i2hml")
+bounce_fx = ExtResource("3_vg0av")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.007, 0.007)
+texture = ExtResource("1_0ww54")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(1.4, 1.4)
+shape = SubResource("CircleShape2D_0ww54")
+
+[node name="BounceSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_136jm")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="A2D_CS2D" type="CollisionShape2D" parent="Area2D"]
+scale = Vector2(1.4, 1.4)
+shape = SubResource("CircleShape2D_0ww54")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
