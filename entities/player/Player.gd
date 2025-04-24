@@ -481,17 +481,19 @@ func pass_ball(ball) -> void:
 	# Detach ball
 		ball._handle_freeze(false, self)
 
-	# Find nearest teammate
-	var teammate = find_nearest_teammate()
+	# Get the pass direction from input (same as movement direction)
+	var pass_direction = move_direction.normalized()
+	if pass_direction.length() < 0.1:
+		pass_direction = looking_direction  # Default to looking direction if no input
+
 	has_ball = false
 	current_state = PlayerState.JUMPING
 
 	# Play pass sound
 	pass_sound.play()
 
-	# Emit signal for the ball system to handle
-	if teammate:
-		emit_signal("ball_passed", self, teammate.global_position, teammate)
+	# Emit signal for the ball system to handle - pass null for teammate since passing is manual
+	emit_signal("ball_passed", self, global_position + (pass_direction * pass_range), null)
 
 # Check for ball in pickup range
 func check_for_ball(area):
@@ -503,12 +505,6 @@ func check_for_ball(area):
 		# Pick up ball - this will handle proper state transition
 		# regardless of current state (including while dashing)
 		pick_up_ball(ball)
-
-# TODO Abdoul - Find the nearest teammate for passing
-func find_nearest_teammate():
-	# This would find the nearest teammate player
-	# For now, return null as placeholder
-	return null
 
 # Update animations based on state and movement
 func update_animations() -> void:
