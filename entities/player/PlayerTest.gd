@@ -7,10 +7,35 @@ extends Node2D
 @onready var state_label = $UI/StateLabel
 @onready var velocity_label = $UI/VelocityLabel
 @onready var dash_recharge_label = $UI/DashRechargeLabel
-@onready var input_setup = $InputSetup
 @onready var ball = $Ball
 
+var max_players: int = 1  # Just testing with one player
+var multiplayer_manager: Node
+var player_scene: PackedScene
+
 func _ready():
+	# Get the MultiplayerManager singleton
+	multiplayer_manager = get_node("/root/MultiplayerManager")
+	if not multiplayer_manager:
+		push_error("MultiplayerManager autoload not found!")
+		return
+
+	# Configure multiplayer manager
+	multiplayer_manager.max_players = max_players
+
+	# We're using direct reference to the player in the scene, no need for player_scene
+	# multiplayer_manager.player_scene is not needed for this test
+
+	# Set up spawn points
+	_update_spawn_points()
+
+	# Configure player inputs using the MultiplayerManager
+	multiplayer_manager.setup_input_map()
+	multiplayer_manager.configure_player_inputs()
+
+	# Set player's input prefix to p1_ (player 1)
+	player.input_prefix = "p1_"
+
 	# Connect player signals
 	player.dash_used.connect(_on_player_dash_used)
 	player.dash_recharged.connect(_on_player_dash_recharged)
@@ -20,6 +45,15 @@ func _ready():
 
 func _process(_delta):
 	_update_ui()
+
+# Update the spawn points in the multiplayer manager
+func _update_spawn_points():
+	multiplayer_manager.spawn_points.clear()
+
+	# Add the player's spawn position
+	var spawn_point = get_node_or_null("SpawnPoints/SpawnPoint1")
+	if spawn_point:
+		multiplayer_manager.spawn_points.append(get_path_to(spawn_point))
 
 func _update_ui():
 	# Update dash counter
@@ -98,9 +132,6 @@ func _on_reset_button_pressed():
 	player.reset_dash_count()
 
 	# Reset ball position and state
-
-	## Old code
-	#ball._handle_freeze(false, player)
 	ball.position = Vector2(578, 262)
 	ball.set_contact_monitor(true) # Enable contact monitor
 	ball.set_collision_layer_value(5, true) # Set enabled collision layer
@@ -134,10 +165,3 @@ func release_button_focus():
 		$UI/ControlsButton.release_focus()
 		if $UI/ControlsPanel.visible:
 			$UI/ControlsPanel/CloseButton.release_focus()
-
-	# Set focus mode to none for all buttons (optional, prevents keyboard navigation)
-	# Uncomment these lines if you want to completely disable keyboard focus
-	# $UI/GiveBallButton.focus_mode = Control.FOCUS_NONE
-	# $UI/ResetButton.focus_mode = Control.FOCUS_NONE
-	# $UI/ControlsButton.focus_mode = Control.FOCUS_NONE
-	# $UI/ControlsPanel/CloseButton.focus_mode = Control.FOCUS_NONE
