@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Pixel Dunk"
-run/main_scene="uid://dlaobnk15kjg0"
+run/main_scene="uid://c3rdlc0cotbpx"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+MultiplayerManager="*res://autoload/MultiplayerManager.tscn"
 
 [layer_names]
 

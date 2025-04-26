@@ -1,0 +1,304 @@
+[gd_scene load_steps=7 format=3 uid="uid://c3rdlc0cotbpx"]
+
+[ext_resource type="Script" uid="uid://bj650q3do8lr3" path="res://scenes/test/MultiplayerTest.gd" id="1_5w3i5"]
+[ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="2_hqbwn"]
+[ext_resource type="PackedScene" uid="uid://doji7rrej3i4x" path="res://entities/ball/Ball.tscn" id="3_ksttu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
+size = Vector2(800, 50)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_63b52"]
+bg_color = Color(0, 0, 0, 0.407843)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n2vy5"]
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="MultiplayerTest" type="Node2D"]
+script = ExtResource("1_5w3i5")
+player_scene = ExtResource("2_hqbwn")
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(580, 500)
+scale = Vector2(1.465, 1)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Ground"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(580, -50)
+scale = Vector2(1.465, 1)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Ceiling"]
+offset_left = -400.0
+offset_top = -25.0
+offset_right = 400.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Wall1" type="StaticBody2D" parent="."]
+position = Vector2(-25, 225)
+scale = Vector2(2.59601, 12.8763)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Wall1"]
+offset_left = -10.0
+offset_top = -25.0
+offset_right = 10.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall1"]
+scale = Vector2(0.025, 1)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Wall2" type="StaticBody2D" parent="."]
+position = Vector2(1175, 225)
+scale = Vector2(1.92, 12.04)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Wall2"]
+offset_left = -10.0
+offset_top = -25.0
+offset_right = 10.0
+offset_bottom = 25.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall2"]
+scale = Vector2(0.025, 1)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Platform1" type="StaticBody2D" parent="."]
+position = Vector2(200, 380)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Platform1"]
+offset_left = -75.0
+offset_top = -10.0
+offset_right = 75.0
+offset_bottom = 10.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
+scale = Vector2(0.2, 0.5)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(950, 380)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Platform2"]
+offset_left = -75.0
+offset_top = -10.0
+offset_right = 75.0
+offset_bottom = 10.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
+scale = Vector2(0.2, 0.5)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Platform3" type="StaticBody2D" parent="."]
+position = Vector2(575, 300)
+collision_layer = 9
+collision_mask = 0
+
+[node name="ColorRect" type="ColorRect" parent="Platform3"]
+offset_left = -100.0
+offset_top = -10.0
+offset_right = 100.0
+offset_bottom = 10.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3"]
+scale = Vector2(0.25, 0.5)
+shape = SubResource("RectangleShape2D_rj6kv")
+
+[node name="Ball" parent="." instance=ExtResource("3_ksttu")]
+position = Vector2(576, 214)
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="SpawnPoint1" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(266, 433)
+
+[node name="SpawnPoint2" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(848, 433)
+
+[node name="SpawnPoint3" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(454, 248)
+
+[node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(684, 248)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="GamePanel" type="Panel" parent="UI"]
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 281.0
+offset_bottom = 142.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
+
+[node name="GameStatusLabel" type="Label" parent="UI"]
+offset_left = 30.0
+offset_top = 30.0
+offset_right = 250.0
+offset_bottom = 56.0
+text = "Players: 0"
+
+[node name="ControlsButton" type="Button" parent="UI" groups=["buttons"]]
+offset_left = 30.0
+offset_top = 105.0
+offset_right = 130.0
+offset_bottom = 140.0
+focus_mode = 0
+text = "Controls"
+
+[node name="ControlsPanel" type="Panel" parent="UI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -181.0
+offset_top = -309.0
+offset_right = 362.0
+offset_bottom = 192.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_n2vy5")
+
+[node name="Label" type="Label" parent="UI/ControlsPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -93.5
+offset_top = 20.0
+offset_right = 93.5
+offset_bottom = 46.0
+grow_horizontal = 2
+text = "CONTROLS"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="UI/ControlsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -179.0
+offset_right = 220.0
+offset_bottom = 179.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "KEYBOARD CONTROLS:
+Movement: ZQSD or Arrow Keys
+Jump: SPACE
+Dash: SHIFT
+Pass: E
+
+CONTROLLER CONTROLS:
+Movement: Left Stick or D-Pad
+Jump: A Button
+Dash: LT (Left Trigger)
+Pass: RT (Right Trigger)
+
+2v2 TEAMS:
+- Team Blue: Players 1 & 3
+- Team Red: Players 2 & 4
+
+NOTE:
+- All players can use controllers
+  if enough are connected
+- Connect controllers before starting"
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="UI/ControlsPanel" groups=["buttons"]]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_top = -40.0
+offset_right = 50.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+text = "Close"
+
+[node name="ConfigPanel" type="Panel" parent="UI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = 270.0
+grow_horizontal = 0
+
+[node name="Label" type="Label" parent="UI/ConfigPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -93.5
+offset_top = 10.0
+offset_right = 93.5
+offset_bottom = 36.0
+grow_horizontal = 2
+text = "2v2 SETUP"
+horizontal_alignment = 1
+
+[node name="InfoLabel" type="Label" parent="UI/ConfigPanel"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 50.0
+offset_right = 220.0
+offset_bottom = 111.0
+text = "4 Players - 2v2 Mode
+
+Team Blue: Players 1 & 3
+Team Red: Players 2 & 4"
+horizontal_alignment = 1
+
+[node name="ResetButton" type="Button" parent="UI/ConfigPanel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 190.0
+offset_right = 124.0
+offset_bottom = 221.0
+text = "Reset Scene"
+
+[node name="ControllersLabel" type="Label" parent="UI/ConfigPanel"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 155.0
+offset_right = 235.0
+offset_bottom = 181.0
+text = "Controllers: 0 Connected"

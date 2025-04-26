@@ -55,6 +55,10 @@ class_name Player
 @export var pass_range: float = 400.0
 ## Player team (0 = blue team, 1 = red team)
 @export var team_id: int = 0
+## Player ID for identification (1-4)
+@export var player_id: int = 1
+## Input prefix for this player (e.g., "p1_" for player 1)
+var input_prefix: String = ""
 
 # State machine - Defines the possible states of the player
 enum PlayerState {
@@ -108,7 +112,7 @@ signal ball_passed(source_player, target_position, target_player)  # Emitted whe
 signal dash_used(player)  # Emitted when a dash is used
 signal dash_recharged(player)  # Emitted when a dash is recharged
 
-# Called when the node is added to the scene
+# Called when the node enters the scene tree for the first time
 func _ready() -> void:
 	# Initialize dash particles (turned off by default)
 	dash_particles.emitting = false
@@ -127,6 +131,9 @@ func _ready() -> void:
 	was_on_ground = false
 	can_coyote_jump = false
 	coyote_timer = 0.0
+
+	# Set up visual indicators for player number and team
+	_update_visual_indicators()
 
 # Called every physics frame (~60 times per second)
 func _physics_process(delta: float) -> void:
@@ -198,7 +205,27 @@ func update_coyote_time(delta: float) -> void:
 func get_input() -> void:
 	# Get directional input (WASD or arrow keys)
 	# Store full directional input for dashing purposes
-	var raw_move = Input.get_vector("move_left", "move_right", "move_up", "move_down").normalized()
+	var input_dir = Vector2.ZERO
+
+	# Use input prefix if available, otherwise use default inputs
+	if input_prefix.is_empty():
+		# Legacy input system without prefix (backward compatibility)
+		input_dir.x = Input.get_axis("move_left", "move_right")
+		input_dir.y = Input.get_axis("move_up", "move_down")
+
+		jump_pressed = Input.is_action_just_pressed("jump")
+		dash_pressed = Input.is_action_just_pressed("dash")
+		pass_pressed = Input.is_action_just_pressed("pass")
+	else:
+		# Prefixed input for multiplayer
+		input_dir.x = Input.get_axis(input_prefix + "move_left", input_prefix + "move_right")
+		input_dir.y = Input.get_axis(input_prefix + "move_up", input_prefix + "move_down")
+
+		jump_pressed = Input.is_action_just_pressed(input_prefix + "jump")
+		dash_pressed = Input.is_action_just_pressed(input_prefix + "dash")
+		pass_pressed = Input.is_action_just_pressed(input_prefix + "pass")
+
+	var raw_move = input_dir.normalized()
 
 	# For normal movement, we'll restrict vertical input when on ground
 	if on_ground and current_state != PlayerState.DASHING:
@@ -211,11 +238,6 @@ func get_input() -> void:
 	# Update looking direction if we're actively moving
 	if move_direction.length() > 0.1:
 		looking_direction = move_direction.normalized()
-
-	# Update action button states
-	dash_pressed = Input.is_action_just_pressed("dash")
-	jump_pressed = Input.is_action_just_pressed("jump")
-	pass_pressed = Input.is_action_just_pressed("pass")
 
 # Apply gravity consistently based on vertical velocity
 func apply_gravity() -> void:
@@ -587,3 +609,38 @@ func _handle_transform_flip():
 		node_flipper.scale.x = abs(node_flipper.scale.x) * -1
 	elif velocity.x > 0: # Turn to face right
 		node_flipper.scale.x = abs(node_flipper.scale.x)
+
+# Set player ID (used for identification)
+func set_player_id(id: int) -> void:
+	player_id = id
+	print("Player ID set in Player.gd: " + str(player_id))
+
+	# Update visuals when player ID changes
+	if is_inside_tree():
+		_update_visual_indicators()
+	else:
+		# If not in tree yet, call deferred when ready
+		call_deferred("_update_visual_indicators")
+
+# Update player visuals based on player ID and team
+func _update_visual_indicators() -> void:
+	# Set sprite color based on team
+	if team_id == 0:  # Blue team
+		sprite.modulate = Color(0.3, 0.3, 1.0)  # Blue tint
+	else:  # Red team
+		sprite.modulate = Color(1.0, 0.3, 0.3)  # Red tint
+
+	# Add player number label if not already present, or update existing one
+	var label = get_node_or_null("PlayerNumberLabel")
+	if not label:
+		label = Label.new()
+		label.name = "PlayerNumberLabel"
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.position = Vector2(-10, -40)
+		label.modulate = Color(1, 1, 1, 0.8)
+		add_child(label)
+
+	# Always update the label text to ensure it shows the correct player_id
+	label.text = str(player_id)
+	print("Player visual updated - ID: " + str(player_id))
