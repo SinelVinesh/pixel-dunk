@@ -62,7 +62,8 @@ enum PlayerState {
 	BALL_POSSESSION, # Holding the ball (restricted movement)
 	DASHING,         # Currently performing a dash
 	JUMPING,         # In the air after jumping (first jump)
-	DOUBLE_JUMPING   # In the air after a second jump
+	DOUBLE_JUMPING,   # In the air after a second jump
+	DUNKING
 }
 var current_state: int = PlayerState.JUMPING  # Current state of the player
 
@@ -91,6 +92,11 @@ var can_coyote_jump: bool = false  # Whether player can use coyote jump
 @onready var jump_sound: AudioStreamPlayer = $JumpSound  # Sound when jumping
 @onready var dash_sound: AudioStreamPlayer = $DashSound  # Sound when dashing
 @onready var pass_sound: AudioStreamPlayer = $PassSound  # Sound when passing
+
+# Hoop
+@onready var hoop = $"../Hoop" 
+var near_hoop: bool = false
+var current_hoop: Node2D = null 
 
 # Input state variables
 var move_direction: Vector2 = Vector2.ZERO  # Direction player is trying to move
@@ -123,6 +129,8 @@ func _ready() -> void:
 	can_coyote_jump = false
 	coyote_timer = 0.0
 
+	if hoop:
+		hoop.connect("player_near_hoop", Callable(self, "_on_player_near_hoop"))
 # Called every physics frame (~60 times per second)
 func _physics_process(delta: float) -> void:
 	# Process player input
@@ -131,7 +139,7 @@ func _physics_process(delta: float) -> void:
 	# Update ground detection
 	was_on_ground = on_ground
 	on_ground = ground_check.is_colliding()
-
+	
 	# Handle coyote time
 	update_coyote_time(delta)
 
@@ -147,7 +155,9 @@ func _physics_process(delta: float) -> void:
 			handle_jump(delta)
 		PlayerState.DOUBLE_JUMPING:
 			handle_double_jump(delta)
-
+		PlayerState.DUNKING:
+			handle_dunk(delta)
+			
 	# Manage dash cooldown timer - pause when having the ball
 	manage_dash_cooldown()
 
@@ -309,6 +319,10 @@ func handle_ball_possession(delta: float) -> void:
 		pass_ball(ball)
 	
 	if jump_pressed:
+		if near_hoop and current_hoop != null:
+			_perform_dunk()
+			return
+		
 		if on_ground:
 			perform_jump()
 		else:
@@ -356,6 +370,8 @@ func handle_jump(delta: float) -> void:
 	# Apply gravity
 	apply_gravity()
 
+	if jump_pressed and near_hoop and current_hoop != null:
+		_perform_dunk()
 	# Handle double jump if available
 	if jump_pressed and can_double_jump and double_jump_enabled:
 		_perform_double_jump()
@@ -438,7 +454,6 @@ func reset_dash_count() -> void:
 
 # DONE Volahary - Handle picking up the ball
 func pick_up_ball(ball) -> void:
-
 	#Set has ball
 	has_ball = true
 
@@ -588,3 +603,67 @@ func _handle_transform_flip():
 		node_flipper.scale.x = abs(node_flipper.scale.x) * -1
 	elif velocity.x > 0: # Turn to face right
 		node_flipper.scale.x = abs(node_flipper.scale.x)
+
+		
+func _on_player_near_hoop(hoop):
+	near_hoop = true
+	current_hoop = hoop
+	
+func _on_player_left_hoop(hoop):
+	if current_hoop == hoop:
+		near_hoop = false
+		current_hoop = null
+
+func handle_dunk(delta: float) -> void:
+	if move_direction.length() > 0.1:
+		velocity.x = lerp(velocity.x, move_direction.x * move_speed * 0.3, acceleration * delta * 0.5)
+	else:
+		velocity.x = velocity.x * (friction + 0.1)
+	
+	
+	velocity.y += gravity * 0.5
+	velocity.y = min(velocity.y, max_fall_speed * 0.7)
+	
+	apply_gravity()
+			
+func _perform_dunk() -> void:
+	if not has_ball or not near_hoop or current_hoop == null:
+		return
+
+	if ball == null:
+		print("Erreur : le nœud Ball n'est pas trouvé !")
+		return
+	current_state = PlayerState.DUNKING
+	var dunking_from_above = global_position.y < current_hoop.global_position.y
+	var player_tween = create_tween()
+	player_tween.set_trans(Tween.TRANS_QUAD)
+	player_tween.set_ease(Tween.EASE_IN_OUT)
+
+	var start_pos = global_position
+	var end_pos = current_hoop.global_position
+
+	var arc_height = 80
+	if dunking_from_above:
+		arc_height = 40
+
+	var tween_duration = 1.0 if dunking_from_above else 0.8
+
+	player_tween.tween_method(
+	func(t: float):
+		if dunking_from_above:
+			var modified_t = 1.0 - pow(1.0 - t, 10)
+			var new_pos = start_pos.lerp(end_pos, modified_t)
+			global_position = new_pos
+		else:
+			var new_pos = start_pos.lerp(end_pos, t)
+			var arc_offset = arc_height * (1.0 - (2.0 * t - 1.0) * (2.0 * t - 1.0))
+			new_pos.y -= arc_offset
+			global_position = new_pos
+	,0.0, 1.0, tween_duration)
+	
+	player_tween.tween_callback(func():
+		ball.get_node('Area2D').set_monitoring(false)  
+		ball.get_node('Area2D').set_monitorable(false) 
+		has_ball = false
+		ball._handle_freeze(false, self)
+	)

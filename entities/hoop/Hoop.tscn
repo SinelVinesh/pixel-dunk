@@ -1,0 +1,61 @@
+[gd_scene load_steps=7 format=3 uid="uid://d3ian3udfvyec"]
+
+[ext_resource type="Script" uid="uid://cxoyoipqy66av" path="res://entities/hoop/Hoop.gd" id="1_8k2ki"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_27ace"]
+size = Vector2(6, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8k2ki"]
+size = Vector2(6, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_125t6"]
+size = Vector2(46, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gg05c"]
+size = Vector2(150, 182)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_54smv"]
+particle_flag_disable_z = true
+emission_shape_scale = Vector3(1, 100, 1)
+emission_shape = 3
+emission_box_extents = Vector3(100, 1, 1)
+direction = Vector3(0, 0, 0)
+gravity = Vector3(0, 0, 0)
+
+[node name="Hoop" type="Node2D"]
+script = ExtResource("1_8k2ki")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(-29, -3)
+collision_layer = 16
+collision_mask = 0
+
+[node name="Hoop" type="ColorRect" parent="StaticBody2D"]
+offset_right = 58.0
+offset_bottom = 6.0
+color = Color(1, 0.647059, 0, 1)
+
+[node name="HoopCollision" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(55, 3)
+shape = SubResource("RectangleShape2D_27ace")
+
+[node name="HoopCollision2" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(3, 3)
+shape = SubResource("RectangleShape2D_8k2ki")
+
+[node name="HoopCollision3" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(29, 3)
+rotation = 3.14159
+shape = SubResource("RectangleShape2D_125t6")
+one_way_collision = true
+
+[node name="DunkArea" type="Area2D" parent="."]
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DunkArea"]
+shape = SubResource("RectangleShape2D_gg05c")
+
+[node name="HoopEffect" type="GPUParticles2D" parent="DunkArea"]
+self_modulate = Color(1.5, 1.5, 1.5, 1)
+amount = 32
+process_material = SubResource("ParticleProcessMaterial_54smv")

@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cfxlgw2f8ig5l"]
+[gd_scene load_steps=0 format=3 uid="uid://cfxlgw2f8ig5l"]
 
 [node name="Point_HUD" type="Control"]
 layout_mode = 3

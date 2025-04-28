@@ -1,0 +1,78 @@
+[gd_scene load_steps=7 format=3 uid="uid://bnj1wmktudrfj"]
+
+[ext_resource type="PackedScene" uid="uid://barswwhwie2go" path="res://scenes/plateform/Plateform.tscn" id="1_xs811"]
+[ext_resource type="Script" uid="uid://dy7mq145p57mo" path="res://scenes/plateform/MovablePlateform.gd" id="2_xu72c"]
+
+[sub_resource type="Curve2D" id="Curve2D_h0ufs"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -1, 4, 0, 0, 0, 0, 106, 5)
+}
+point_count = 2
+
+[sub_resource type="Animation" id="Animation_xu72c"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PathFollow2D:progress_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_xs811"]
+resource_name = "move"
+length = 2.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PathFollow2D:progress_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(-1.56, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_berth"]
+_data = {
+&"RESET": SubResource("Animation_xu72c"),
+&"move": SubResource("Animation_xs811")
+}
+
+[node name="Plateform" instance=ExtResource("1_xs811")]
+curve = SubResource("Curve2D_h0ufs")
+script = ExtResource("2_xu72c")
+loop = false
+
+[node name="PathFollow2D" type="PathFollow2D" parent="." index="0"]
+position = Vector2(-1, 4)
+rotates = false
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="PathFollow2D" index="0"]
+remote_path = NodePath("../../AnimatableBody2D")
+
+[node name="AnimatableBody2D" parent="." index="1"]
+position = Vector2(-1, 4)
+sync_to_physics = false
+
+[node name="ColorRect" parent="AnimatableBody2D" index="0"]
+offset_left = -78.0
+offset_top = -4.0
+offset_right = 76.0
+offset_bottom = 7.0
+
+[node name="CollisionShape2D" parent="AnimatableBody2D" index="1"]
+scale = Vector2(0.5, 0.5)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="2"]
+libraries = {
+&"": SubResource("AnimationLibrary_berth")
+}

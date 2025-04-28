@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://doji7rrej3i4x"]
+[gd_scene load_steps=7 format=3 uid="uid://bee54h56naa7b"]
 
 [ext_resource type="Texture2D" uid="uid://b13vgahdymses" path="res://entities/ball/placeholder_ball.png" id="1_0ww54"]
 [ext_resource type="PhysicsMaterial" uid="uid://dlo5nwpjj10pb" path="res://entities/ball/Ball_PhysicMaterial.tres" id="1_aufmo"]

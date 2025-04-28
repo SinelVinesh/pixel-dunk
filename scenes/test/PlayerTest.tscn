@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="1_l1x32"]
 [ext_resource type="Script" uid="uid://c4a2kv7cbajpm" path="res://entities/player/PlayerTest.gd" id="1_tih6e"]
 [ext_resource type="Script" uid="uid://nt1t181hmdji" path="res://entities/player/InputSetup.gd" id="3_3i8no"]
-[ext_resource type="PackedScene" uid="uid://doji7rrej3i4x" path="res://entities/ball/Ball.tscn" id="4_ojedb"]
+[ext_resource type="PackedScene" uid="uid://bee54h56naa7b" path="res://entities/ball/Ball.tscn" id="4_ojedb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(800, 50)
