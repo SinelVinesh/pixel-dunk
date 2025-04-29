@@ -136,7 +136,7 @@ func assign_controller_to_player(player_idx: int, device_idx: int):
 	# Actions - Face buttons and triggers
 	add_joy_button_event(player_prefix + "jump", device_idx, JOY_BUTTON_A)
 	add_joy_trigger_event(player_prefix + "dash", device_idx, JOY_AXIS_TRIGGER_LEFT)
-	add_joy_trigger_event(player_prefix + "pass", device_idx, JOY_AXIS_TRIGGER_RIGHT)
+	add_joy_button_event(player_prefix + "pass", device_idx, JOY_BUTTON_RIGHT_SHOULDER)
 
 	print("Controller ", device_idx, " assigned to Player ", player_idx)
 

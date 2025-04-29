@@ -184,5 +184,11 @@ shape = SubResource("RectangleShape2D_64wtt")
 [node name="BallPosition" type="Marker2D" parent="Node_Flipper"]
 position = Vector2(20, 0)
 
+[node name="PassDirectionLine" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(0, 0, 100, 0)
+width = 2.0
+default_color = Color(1, 1, 1, 0.392157)
+
 [connection signal="timeout" from="DashCooldownTimer" to="." method="_on_dash_cooldown_timer_timeout"]
 [connection signal="area_entered" from="Check_Ball_A2D" to="." method="_on_check_ball_a_2d_area_entered"]

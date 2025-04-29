@@ -51,8 +51,8 @@ class_name Player
 @export var reset_timer_after_dash: bool = true
 
 @export_group("Game")
-## Maximum distance for passing the ball to teammates
-@export var pass_range: float = 400.0
+## Speed of the ball when passed
+@export var pass_speed: float = 800.0
 ## Player team (0 = blue team, 1 = red team)
 @export var team_id: int = 0
 ## Player ID for identification (1-4)
@@ -91,6 +91,7 @@ var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player 
 @onready var dash_cooldown_timer: Timer = $DashCooldownTimer  # Timer for recharging dashes
 @onready var animation_player: AnimationPlayer = $AnimationPlayer  # Controls animations
 @onready var node_flipper : Node2D = $Node_Flipper # Used to flip its child nodes
+@onready var pass_direction_line: Line2D = $PassDirectionLine # Line showing pass direction
 
 # Sound effect nodes
 @onready var jump_sound: AudioStreamPlayer = $JumpSound  # Sound when jumping
@@ -108,7 +109,6 @@ var pass_pressed: bool = false  # Whether pass button was just pressed
 var ball
 
 # Signals - Events that other nodes can connect to
-signal ball_passed(source_player, target_position, target_player)  # Emitted when passing the ball
 signal dash_used(player)  # Emitted when a dash is used
 signal dash_recharged(player)  # Emitted when a dash is recharged
 
@@ -238,6 +238,9 @@ func get_input() -> void:
 	# Update looking direction if we're actively moving
 	if move_direction.length() > 0.1:
 		looking_direction = move_direction.normalized()
+
+	# Update pass direction line
+	update_pass_direction_line(input_dir)
 
 # Apply gravity consistently based on vertical velocity
 func apply_gravity() -> void:
@@ -439,8 +442,19 @@ func handle_double_jump(delta: float) -> void:
 
 # Start a dash - used by multiple states
 func start_dash() -> void:
-	# For dashing, we want to use the raw input direction to allow diagonal dashes
-	var dash_input = Input.get_vector("move_left", "move_right", "move_up", "move_down").normalized()
+	# For dashing, we want to use the raw input direction to allow diagonal dashes,
+	# if multiplayer, we have a prefix like "p1_"
+	var dash_input: Vector2
+	var prefix = input_prefix
+	if prefix.is_empty():
+		prefix = ""
+
+	dash_input = Input.get_vector(
+		prefix + "move_left",
+		prefix + "move_right",
+		prefix + "move_up",
+		prefix + "move_down"
+	).normalized()
 
 	# Get dash direction (use raw input or looking direction)
 	dash_direction = dash_input if dash_input.length() > 0.1 else looking_direction
@@ -489,33 +503,48 @@ func pick_up_ball(ball) -> void:
 	# Attach ball
 	ball._handle_freeze(true, self)
 
-# Pass the ball to a teammate - Almost now i need to launch it in desired direction
+# Pass the ball to a teammate
 func pass_ball(ball) -> void:
-
 	# Do nothing if has no ball
-	if not has_ball:
+	if not has_ball or not ball:
 		return
+
+	# Get the pass direction from input
+	var pass_direction = Vector2.ZERO
+	if input_prefix.is_empty():
+		pass_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	else:
-		#Set has no ball
-		has_ball = false
-		pass
+		pass_direction = Input.get_vector(
+			input_prefix + "move_left",
+			input_prefix + "move_right",
+			input_prefix + "move_up",
+			input_prefix + "move_down"
+		)
 
-	# Detach ball
-		ball._handle_freeze(false, self)
-
-	# Get the pass direction from input (same as movement direction)
-	var pass_direction = move_direction.normalized()
+	# If no input direction, use looking direction
 	if pass_direction.length() < 0.1:
-		pass_direction = looking_direction  # Default to looking direction if no input
+		pass_direction = looking_direction
 
+	# Normalize the direction
+	pass_direction = pass_direction.normalized()
+
+	# Release the ball
 	has_ball = false
-	current_state = PlayerState.JUMPING
+	ball._handle_freeze(false, self)
+
+	# Apply pass velocity to the ball
+	ball.linear_velocity = pass_direction * pass_speed
+
+	# Reset player state
+	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
+
+	# Recharge dash completely
+	dash_count = max_dash_count
+	dash_cooldown_timer.stop()
+	emit_signal("dash_recharged", self)
 
 	# Play pass sound
 	pass_sound.play()
-
-	# Emit signal for the ball system to handle - pass null for teammate since passing is manual
-	emit_signal("ball_passed", self, global_position + (pass_direction * pass_range), null)
 
 # Check for ball in pickup range
 func check_for_ball(area):
@@ -644,3 +673,19 @@ func _update_visual_indicators() -> void:
 	# Always update the label text to ensure it shows the correct player_id
 	label.text = str(player_id)
 	print("Player visual updated - ID: " + str(player_id))
+
+# Update the pass direction indicator line
+func update_pass_direction_line(input_dir: Vector2) -> void:
+	if has_ball:
+		pass_direction_line.visible = true
+		var pass_direction = input_dir.normalized()
+		if pass_direction.length() < 0.1:
+			pass_direction = looking_direction
+
+		# Update line points
+		pass_direction_line.points = PackedVector2Array([
+			Vector2.ZERO,
+			pass_direction * 50  # Line length
+		])
+	else:
+		pass_direction_line.visible = false
