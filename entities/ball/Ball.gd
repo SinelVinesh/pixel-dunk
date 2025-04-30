@@ -33,8 +33,6 @@ func _process(delta: float) -> void:
 
 #Called each time collides with a body
 func _on_body_entered(body: Node) -> void:
-	pass
-
 	#Apply speed loss on bounce
 	linear_velocity = linear_velocity.normalized() * linear_velocity.length() * bounce_speed_loss
 

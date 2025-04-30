@@ -123,8 +123,9 @@ func _ready() -> void:
 	# Initialize dash particles (turned off by default)
 	dash_particles.emitting = false
 
-	# Reset the dash count to maximum
-	reset_dash_count()
+	# Initialize dash count to max (we'll start with full dashes)
+	dash_count = max_dash_count
+	emit_signal("dash_recharged", self)
 
 	# Configure dash cooldown timer
 	dash_cooldown_timer.wait_time = dash_recharge_time
@@ -505,6 +506,10 @@ func reset_dash_count() -> void:
 
 # Handle picking up the ball
 func pick_up_ball(ball) -> void:
+	# Do nothing if player already has the ball
+	if has_ball:
+		return
+
 	#Set has ball
 	has_ball = true
 
@@ -516,6 +521,18 @@ func pick_up_ball(ball) -> void:
 	else:
 		# If not dashing, switch directly to ball possession
 		current_state = PlayerState.BALL_POSSESSION
+
+	# Recharge dash by 1 point when getting the ball (regardless of previous state)
+	# Only recharge if not already at max
+	if dash_count < max_dash_count:
+		dash_count += 1
+		# Stop the cooldown timer to prevent extra recharges
+		dash_cooldown_timer.stop()
+		emit_signal("dash_recharged", self)
+
+	# If dash was fully empty and needs to start recharging for the remaining point
+	# if dash_count < max_dash_count:
+	# 	dash_cooldown_timer.start()
 
 	# Attach ball
 	ball._handle_freeze(true, self)
@@ -555,11 +572,6 @@ func pass_ball(ball) -> void:
 
 	# Reset player state
 	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
-
-	# Recharge dash completely
-	dash_count = max_dash_count
-	dash_cooldown_timer.stop()
-	emit_signal("dash_recharged", self)
 
 	# Play pass sound
 	pass_sound.play()
@@ -634,22 +646,19 @@ func _on_dash_cooldown_timer_timeout() -> void:
 	if dash_count < max_dash_count:
 		dash_cooldown_timer.start()  # Continue recharging
 
-	# Called when an area 2d enters check ball area 2d
+# Called when an area 2d enters check ball area 2d
 func _on_check_ball_a_2d_area_entered(area: Area2D) -> void:
-	pass
-
 	# Check if the area owner is the ball
 	check_for_ball(area)
-	#print ("check for ball") # For debug
 
-	# Handle ball attachment
+# Handle ball attachment
 func _manage_ball_attachment(ball):
 	if has_ball and ball != null:
 		ball.global_position = ball_position.global_position # Attach ball
 	else:
 		pass
 
-	# Used to "flip" transform of desired nodes, just add them
+# Used to "flip" transform of desired nodes, just add them
 func _handle_transform_flip():
 	pass
 	if velocity.x < 0: # Turn to face left
