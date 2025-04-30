@@ -59,12 +59,14 @@ func _integrate_forces(state):
 	last_state = state #Store state in last state
 
 # Handle activate / deactivate ball collision and gravity when picked up / passed
+# Condition: true = freeze ball for pickup, false = unfreeze ball for pass
+# Handler: player who has ball
 func _handle_freeze(condition : bool, handler):
 	if condition:
 		set_contact_monitor(false) # Disable contact monitor
 
-		# Abdoul - I removed zeroing velocity to make sure to preserve player momentum
-		## Old code: linear_velocity = Vector2.ZERO # Stop current ball movement
+		# Set gravity scale to 0 to prevent gravity accumulation while held
+		set_gravity_scale(0)
 
 		set_collision_layer_value(5, false) # Set no collision layer
 
@@ -72,21 +74,20 @@ func _handle_freeze(condition : bool, handler):
 		ball_area.set_monitoring(false)
 		ball_area.set_monitorable(false)
 
-		## Old code
-		#freeze = true # Stop ball
-		#set_deferred("process_mode", Node.PROCESS_MODE_DISABLED) #Stop ball physic simulation
 		ball_handler = handler # Set ball handler to current player who has ball
-		#print(ball_handler.name) # For debug
 	else:
-		pass
+		# Reset gravity to default before passing
+		set_gravity_scale(default_gravity_scale)
+
 		set_contact_monitor(true) # Enable contact monitor
 		set_collision_layer_value(5, true) # Set enabled collision layer
+
 		# Set monitoring and monitorable for ball area 2d
 		ball_area.set_monitoring(true)
 		ball_area.set_monitorable(true)
-		linear_velocity = Vector2.ZERO # Stop current ball movement
 
-		## Old code
-		#freeze = false # No more stop ball
-		#set_deferred("process_mode", Node.PROCESS_MODE_INHERIT) # Begin ball physic simulation
+		# Note: When passing, linear_velocity will be set completely in the Player's pass_ball() function
+		# We don't want to zero it here anymore, as we prefer to have the complete velocity set later
+		# This helps with keeping player momentum in passes
+
 		ball_handler = null # Clear ball handler

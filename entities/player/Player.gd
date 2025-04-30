@@ -52,7 +52,7 @@ class_name Player
 
 @export_group("Game")
 ## Speed of the ball when passed
-@export var pass_speed: float = 800.0
+@export var pass_speed: float = 1300.0
 ## Player team (0 = blue team, 1 = red team)
 @export var team_id: int = 0
 ## Player ID for identification (1-4)
@@ -143,6 +143,7 @@ func _ready() -> void:
 
 	if hoop:
 		hoop.connect("player_near_hoop", Callable(self, "_on_player_near_hoop"))
+
 # Called every physics frame (~60 times per second)
 func _physics_process(delta: float) -> void:
 	# Process player input
@@ -529,7 +530,7 @@ func pass_ball(ball) -> void:
 	var pass_direction = Vector2.ZERO
 	if input_prefix.is_empty():
 		pass_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	else:
+	else: # Multiplayer
 		pass_direction = Input.get_vector(
 			input_prefix + "move_left",
 			input_prefix + "move_right",
@@ -548,7 +549,8 @@ func pass_ball(ball) -> void:
 	has_ball = false
 	ball._handle_freeze(false, self)
 
-	# Apply pass velocity to the ball
+	# Apply pass velocity to the ball - completely override any previous velocity
+	# This ensures the ball travels exactly in the intended direction without dipping
 	ball.linear_velocity = pass_direction * pass_speed
 
 	# Reset player state

@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://jfb05w7hm3wa"]
+[gd_scene load_steps=6 format=3 uid="uid://jfb05w7hm3wa"]
 
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="1_35t7f"]
 [ext_resource type="PackedScene" uid="uid://barswwhwie2go" path="res://scenes/plateform/Plateform.tscn" id="1_ouf45"]
-[ext_resource type="Script" path="res://entities/player/InputSetup.gd" id="2_ouf45"]
 [ext_resource type="PackedScene" uid="uid://bnj1wmktudrfj" path="res://scenes/plateform/MovablePlateform.tscn" id="4_1hwmp"]
 [ext_resource type="Curve2D" uid="uid://y47ur68o5y5y" path="res://scenes/plateform/CirclePath.tres" id="5_6kmgl"]
 [ext_resource type="Curve2D" uid="uid://dfh2d6lpbr0dq" path="res://scenes/plateform/LinearPath.tres" id="6_kudqm"]
@@ -16,9 +15,6 @@ scale = Vector2(3, 2.04)
 
 [node name="Player" parent="." instance=ExtResource("1_35t7f")]
 position = Vector2(599, 454)
-
-[node name="Node" type="Node" parent="."]
-script = ExtResource("2_ouf45")
 
 [node name="Plateform2" parent="." instance=ExtResource("4_1hwmp")]
 position = Vector2(356, 474)
