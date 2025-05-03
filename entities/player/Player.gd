@@ -583,9 +583,11 @@ func check_for_ball(area):
 		# Store ball reference
 		ball = area.owner
 
-		# Pick up ball - this will handle proper state transition
-		# regardless of current state (including while dashing)
-		pick_up_ball(ball)
+		# Check if this player is allowed to pick up the ball
+		if ball.can_pickup(self):
+			# Pick up ball - this will handle proper state transition
+			# regardless of current state (including while dashing)
+			pick_up_ball(ball)
 
 # Update animations based on state and movement
 func update_animations() -> void:
