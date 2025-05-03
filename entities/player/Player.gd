@@ -510,6 +510,16 @@ func pick_up_ball(ball) -> void:
 	if has_ball:
 		return
 
+	# Store the previous ball just in case we need it later
+	# var previous_ball_handler = ball.ball_handler
+
+	# Attempt to pick up the ball - this might fail if the current handler is dashing
+	ball._handle_freeze(true, self)
+
+	# Check if we actually got the ball (steal might have been rejected)
+	if ball.ball_handler != self:
+		return  # Steal was rejected, don't update player state
+
 	#Set has ball
 	has_ball = true
 
@@ -533,9 +543,6 @@ func pick_up_ball(ball) -> void:
 	# If dash was fully empty and needs to start recharging for the remaining point
 	# if dash_count < max_dash_count:
 	# 	dash_cooldown_timer.start()
-
-	# Attach ball
-	ball._handle_freeze(true, self)
 
 # Pass the ball to a teammate
 func pass_ball(ball) -> void:

@@ -133,7 +133,7 @@ scale = Vector2(0.25, 0.5)
 shape = SubResource("RectangleShape2D_rj6kv")
 
 [node name="Ball" parent="." instance=ExtResource("3_ksttu")]
-position = Vector2(576, 214)
+position = Vector2(574, 352)
 
 [node name="SpawnPoints" type="Node2D" parent="."]
 
