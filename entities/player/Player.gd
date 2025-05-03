@@ -689,25 +689,17 @@ func set_player_id(id: int) -> void:
 
 # Update player visuals based on player ID and team
 func _update_visual_indicators() -> void:
-	# Set sprite color based on team
-	if team_id == 0:  # Blue team
-		sprite.modulate = Color(0.3, 0.3, 1.0)  # Blue tint
-	else:  # Red team
-		sprite.modulate = Color(1.0, 0.3, 0.3)  # Red tint
+	# Update tooltip texture based on team_id
+	var tooltip = $Sprite2D_tooltip
+	if tooltip:
+		var texture_path = "res://entities/player/assets/Character_Tooltip" + str(team_id + 1) + ".png"
+		tooltip.texture = load(texture_path)
 
-	# Add player number label if not already present, or update existing one
-	var label = get_node_or_null("PlayerNumberLabel")
-	if not label:
-		label = Label.new()
-		label.name = "PlayerNumberLabel"
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.position = Vector2(-10, -40)
-		label.modulate = Color(1, 1, 1, 0.8)
-		add_child(label)
+	# Update the player label in the tooltip
+	var player_label = $Sprite2D_tooltip/PlayerLabel
+	if player_label:
+		player_label.text = "P" + str(player_id)
 
-	# Always update the label text to ensure it shows the correct player_id
-	label.text = str(player_id)
 	print("Player visual updated - ID: " + str(player_id))
 
 # Update the pass direction indicator line
