@@ -25,6 +25,9 @@ var ball_handler # Node for the player currently holding the ball
 var previous_handler # Node for the player that previously held the ball
 var handlers_to_ignore = [] # Array of players that temporarily cannot pickup the ball
 
+# The gravity scale to exaggerate the ball's shooting trajectory
+var shoot_gravity_scale: float = 1.8
+
 #On ball spawn
 func _ready() -> void:
 	# Create steal cooldown timer if it doesn't exist

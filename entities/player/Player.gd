@@ -58,9 +58,10 @@ class_name Player
 ## Player ID for identification (1-4)
 @export var player_id: int = 1
 ## Speed of the ball when the player shoots
-@export var shoot_speed: float = 1500.0
+@export var shoot_speed: float = 1200.0
 ## Length of the trajectory curve in SHOOTING state
-@export var trajectory_length: float = 15
+@export var trajectory_length: float = 50
+
 ## Input prefix for this player (e.g., "p1_" for player 1)
 var input_prefix: String = ""
 
@@ -740,22 +741,25 @@ func update_pass_direction_line(input_dir: Vector2) -> void:
 		pass_direction_line.visible = false
 
 func _draw_trajectory_curve(direction: Vector2) -> void:
-	var gravity:float = ProjectSettings.get_setting("physics/2d/default_gravity")
-	
-	var time_step = 0.02
+	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+	var time_step := 0.1
+	var num_points := trajectory_length
 	
 	var points = PackedVector2Array()
-	points.append(Vector2.ZERO)
 	
-	var velocity = direction * shoot_speed
-	var pos = Vector2.ZERO
 	
-	for i in range(1, trajectory_length):
-		velocity.y += gravity * time_step
-		print(velocity)
-		pos = pos + (velocity * time_step)
-		points.append(pos)
-
+	var position = ball.position - global_position
+	var velocity = direction.normalized() * shoot_speed
+	
+	for i in range(num_points):
+		points.append(position)
+		
+		# Apply velocity to position
+		position += velocity * time_step
+		
+		# Apply gravity to vertical velocity
+		velocity.y += gravity * ball.shoot_gravity_scale * time_step
+	
 	pass_direction_line.points = points
 
 func _on_player_near_hoop(hoop):
@@ -819,9 +823,44 @@ func _perform_dunk() -> void:
 		has_ball = false
 		ball._handle_freeze(false, self)
 	)
+	
+func shoot_ball(ball) -> void:
+	# Do nothing if has no ball
+	if not has_ball or not ball:
+		return
+
+	# Get the pass direction from input
+	var shot_direction = Vector2.ZERO
+	if input_prefix.is_empty():
+		shot_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	else: # Multiplayer
+		shot_direction = Input.get_vector(
+			input_prefix + "move_left",
+			input_prefix + "move_right",
+			input_prefix + "move_up",
+			input_prefix + "move_down"
+		)
+
+	# If no input direction, use looking direction
+	if shot_direction.length() < 0.1:
+		shot_direction = looking_direction
+
+	# Normalize the direction
+	shot_direction = shot_direction.normalized()
+
+	# Release the ball
+	has_ball = false
+	ball._handle_freeze(false, self)
+	
+	ball.set_gravity_scale(ball.shoot_gravity_scale)
+
+	# Apply pass velocity to the ball - completely override any previous velocity
+	# This ensures the ball travels exactly in the intended direction without dipping
+	ball.linear_velocity = shot_direction * shoot_speed
+	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 
 func handle_shooting(delta: float) -> void:
 	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
 	
 	if shoot_released:
-		current_state = PlayerState.JUMPING if not on_ground else PlayerState.BALL_POSSESSION
+		shoot_ball(ball)
