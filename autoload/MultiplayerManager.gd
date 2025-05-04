@@ -35,7 +35,7 @@ func setup_input_map():
 	# Define all the actions we'll use
 	var actions = [
 		"move_left", "move_right", "move_up", "move_down",
-		"jump", "dash", "pass"
+		"jump", "dash", "pass", "shoot"
 	]
 
 	# Create player-specific actions
@@ -110,6 +110,7 @@ func assign_keyboard_to_player(player_idx: int):
 	add_keyboard_event(player_prefix + "jump", KEY_SPACE)
 	add_keyboard_event(player_prefix + "dash", KEY_SHIFT)
 	add_keyboard_event(player_prefix + "pass", KEY_E)
+	add_keyboard_event(player_prefix + "shoot", KEY_CTRL)
 
 	print("Keyboard assigned to Player ", player_idx)
 
@@ -137,6 +138,7 @@ func assign_controller_to_player(player_idx: int, device_idx: int):
 	add_joy_button_event(player_prefix + "jump", device_idx, JOY_BUTTON_A)
 	add_joy_trigger_event(player_prefix + "dash", device_idx, JOY_AXIS_TRIGGER_LEFT)
 	add_joy_button_event(player_prefix + "pass", device_idx, JOY_BUTTON_RIGHT_SHOULDER)
+	add_joy_trigger_event(player_prefix + "shoot", device_idx, JOY_AXIS_TRIGGER_RIGHT)
 
 	print("Controller ", device_idx, " assigned to Player ", player_idx)
 
