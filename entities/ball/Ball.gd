@@ -89,6 +89,7 @@ func _handle_freeze(condition : bool, handler):
 		# Check if ball is being stolen from another player
 		if ball_handler != null and ball_handler != handler:
 			handle_ball_steal(handler)
+			# Note: ball_handler is now set in handle_ball_steal if the steal was successful
 		else:
 			ball_handler = handler # Set ball handler to current player who has ball
 	else:
@@ -119,6 +120,10 @@ func handle_ball_steal(new_handler):
 
 	# If the previous handler is a valid player
 	if previous_handler != null:
+		# Check if the current handler is dashing - if so, ignore steal attempt
+		if previous_handler.current_state == previous_handler.PlayerState.DASHING:
+			return  # Abort steal, ball handler keeps the ball
+
 		# Add previous handler to ignore list
 		handlers_to_ignore.append(previous_handler)
 
@@ -133,8 +138,11 @@ func handle_ball_steal(new_handler):
 		steal_cooldown_timer.wait_time = steal_cooldown_duration
 		steal_cooldown_timer.start()
 
-	# Set the new handler
-	ball_handler = new_handler
+		# Set the new handler
+		ball_handler = new_handler
+	else:
+		# If there was no previous handler, just set the new one
+		ball_handler = new_handler
 
 # Show a visual effect when the ball is stolen
 func show_steal_effect():
