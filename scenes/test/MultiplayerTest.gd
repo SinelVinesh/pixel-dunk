@@ -20,6 +20,9 @@ var game_running: bool = false
 # Multiplayer manager reference
 var multiplayer_manager: Node
 
+# Score manager reference
+var score_manager: Node
+
 # Dash indicators references
 var dash_indicators = []
 
@@ -30,6 +33,14 @@ func _ready():
 	if not multiplayer_manager:
 		push_error("MultiplayerManager autoload not found!")
 		return
+
+	# Get the ScoreManager singleton
+	score_manager = get_node("/root/ScoreManager")
+	if not score_manager:
+		push_error("ScoreManager autoload not found!")
+	else:
+		# Connect to score updated signal
+		score_manager.score_updated.connect(_on_score_updated)
 
 	# Connect button signals
 	controls_button.pressed.connect(_on_controls_button_pressed)
@@ -51,6 +62,10 @@ func _ready():
 
 	# Start the game automatically
 	_start_game()
+
+	# Make sure initial score is displayed
+	if score_manager:
+		_on_score_updated(score_manager.blue_team_score, score_manager.red_team_score, score_manager.stackable_points)
 
 # Process function for gameplay
 func _process(delta):
@@ -234,6 +249,10 @@ func _reset_game():
 	# Update player count display
 	game_status_label.text = "Players: 0"
 
+	# Reset scores
+	if score_manager:
+		score_manager.reset_scores()
+
 	# Release focus from the button
 	reset_button.release_focus()
 
@@ -269,3 +288,18 @@ func _unhandled_input(event):
 			# Also close controls panel if open
 			if controls_panel.visible:
 				controls_panel.visible = false
+
+# Called when score is updated
+func _on_score_updated(blue_score: int, red_score: int, stackable: int):
+	var blue_label = $UI/ScorePanel/BlueTeamLabel
+	var red_label = $UI/ScorePanel/RedTeamLabel
+	var combo_label = $UI/ScorePanel/ComboLabel
+
+	if blue_label:
+		blue_label.text = "Blue Team: " + str(blue_score)
+
+	if red_label:
+		red_label.text = "Red Team: " + str(red_score)
+
+	if combo_label:
+		combo_label.text = "Combo Points: " + str(stackable)

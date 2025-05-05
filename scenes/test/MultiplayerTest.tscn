@@ -153,9 +153,9 @@ position = Vector2(684, 248)
 
 [node name="GamePanel" type="Panel" parent="UI"]
 offset_left = 15.0
-offset_top = 15.0
+offset_top = 17.0
 offset_right = 281.0
-offset_bottom = 142.0
+offset_bottom = 144.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
 
 [node name="GameStatusLabel" type="Label" parent="UI"]
@@ -172,6 +172,48 @@ offset_right = 130.0
 offset_bottom = 140.0
 focus_mode = 0
 text = "Controls"
+
+[node name="ScorePanel" type="Panel" parent="UI"]
+offset_left = 466.0
+offset_top = 10.0
+offset_right = 791.0
+offset_bottom = 130.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_63b52")
+
+[node name="TitleLabel" type="Label" parent="UI/ScorePanel"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = 115.0
+offset_bottom = 36.0
+text = "SCOREBOARD"
+
+[node name="BlueTeamLabel" type="Label" parent="UI/ScorePanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 48.0
+offset_right = 116.0
+offset_bottom = 74.0
+theme_override_colors/font_color = Color(0.3, 0.3, 1, 1)
+text = "Blue Team: 0"
+
+[node name="RedTeamLabel" type="Label" parent="UI/ScorePanel"]
+layout_mode = 0
+offset_left = 182.0
+offset_top = 47.0
+offset_right = 282.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+text = "Red Team: 0"
+
+[node name="ComboLabel" type="Label" parent="UI/ScorePanel"]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 80.0
+offset_right = 211.0
+offset_bottom = 106.0
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+text = "Combo Points: 0"
 
 [node name="ControlsPanel" type="Panel" parent="UI"]
 visible = false

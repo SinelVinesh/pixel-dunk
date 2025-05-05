@@ -378,7 +378,7 @@ func handle_ball_possession(delta: float) -> void:
 		else:
 			_perform_double_jump()
 			pass
-			
+
 
 # Handle behavior during a dash (DASHING state)
 func handle_dash(delta: float) -> void:
@@ -601,6 +601,9 @@ func pass_ball(ball) -> void:
 	# Play pass sound
 	pass_sound.play()
 
+	# Points are now tracked directly in the Ball script when the ball is caught
+	# This prevents points from being added for self-passes
+
 # Check for ball in pickup range
 func check_for_ball(area):
 	# Check if the area owner is a ball, if yes, pick up ball
@@ -724,11 +727,11 @@ func _update_visual_indicators() -> void:
 func update_pass_direction_line(input_dir: Vector2) -> void:
 	if has_ball:
 		pass_direction_line.visible = true
-		
+
 		var pass_direction = input_dir.normalized()
 		if pass_direction.length() < 0.1:
 			pass_direction = looking_direction
-			
+
 		if current_state != PlayerState.SHOOTING:
 			pass_direction_line.points = PackedVector2Array([
 				Vector2.ZERO,
@@ -743,22 +746,22 @@ func _draw_trajectory_curve(direction: Vector2) -> void:
 	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 	var time_step := 0.1
 	var num_points := trajectory_length
-	
+
 	var points = PackedVector2Array()
-	
-	
+
+
 	var position = ball.position - global_position
 	var velocity = direction.normalized() * shoot_speed
-	
+
 	for i in range(num_points):
 		points.append(position)
-		
+
 		# Apply velocity to position
 		position += velocity * time_step
-		
+
 		# Apply gravity to vertical velocity
 		velocity.y += gravity * ball.shoot_gravity_scale * time_step
-	
+
 	pass_direction_line.points = points
 
 func _on_player_near_hoop(hoop):
@@ -821,8 +824,19 @@ func _perform_dunk() -> void:
 		ball.get_node('Area2D').set_monitorable(false)
 		has_ball = false
 		ball._handle_freeze(false, self)
+
+		# Add score for the dunk
+		var score_manager = get_node_or_null("/root/ScoreManager")
+		if score_manager:
+			score_manager.add_score_points(team_id, true) # true = is a dunk
+
+		# Return to normal state after small delay
+		var return_timer = get_tree().create_timer(0.5)
+		return_timer.timeout.connect(func():
+			current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
+		)
 	)
-	
+
 func shoot_ball(ball) -> void:
 	# Do nothing if has no ball
 	if not has_ball or not ball:
@@ -850,7 +864,7 @@ func shoot_ball(ball) -> void:
 	# Release the ball
 	has_ball = false
 	ball._handle_freeze(false, self)
-	
+
 	ball.set_gravity_scale(ball.shoot_gravity_scale)
 
 	# Apply pass velocity to the ball - completely override any previous velocity
@@ -858,8 +872,13 @@ func shoot_ball(ball) -> void:
 	ball.linear_velocity = shot_direction * shoot_speed
 	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 
+	# Add score for the shot
+	var score_manager = get_node_or_null("/root/ScoreManager")
+	if score_manager:
+		score_manager.add_score_points(team_id, false) # false = is not a dunk, but a shot
+
 func handle_shooting(delta: float) -> void:
 	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
-	
+
 	if shoot_released:
 		shoot_ball(ball)

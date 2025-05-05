@@ -23,6 +23,7 @@ var last_state: PhysicsDirectBodyState2D #State that contains contact collision 
 var min_velocity : float # Minimum velocity to apply bounce vfx / sfx
 var ball_handler # Node for the player currently holding the ball
 var previous_handler # Node for the player that previously held the ball
+var previous_passer # Node for the player who last passed the ball
 var handlers_to_ignore = [] # Array of players that temporarily cannot pickup the ball
 
 # The gravity scale to exaggerate the ball's shooting trajectory
@@ -95,6 +96,22 @@ func _handle_freeze(condition : bool, handler):
 			# Note: ball_handler is now set in handle_ball_steal if the steal was successful
 		else:
 			ball_handler = handler # Set ball handler to current player who has ball
+
+			# Also update ScoreManager for normal ball pickup
+			var score_manager = get_node_or_null("/root/ScoreManager")
+			if score_manager and handler != null:
+				# Only add stackable points if:
+				# - There is a previous passer (ball was actually passed)
+				# - Current handler is not the previous passer (not catching your own pass)
+				# - Previous passer and current handler are on the same team
+				if previous_passer != null and previous_passer != handler and previous_passer.team_id == handler.team_id:
+					score_manager.add_pass_points()
+
+				# Always check ball possession to handle team changes
+				score_manager.check_ball_possession(handler)
+
+				# Reset previous passer after successful catch is processed
+				previous_passer = null
 	else:
 		# Reset gravity to default before passing
 		set_gravity_scale(default_gravity_scale)
@@ -110,8 +127,9 @@ func _handle_freeze(condition : bool, handler):
 		# We don't want to zero it here anymore, as we prefer to have the complete velocity set later
 		# This helps with keeping player momentum in passes
 
-		# Set previous handler to current handler before clearing
+		# Record who is passing the ball before clearing the handler
 		if ball_handler != null:
+			previous_passer = ball_handler
 			previous_handler = ball_handler
 
 		ball_handler = null # Clear ball handler
@@ -143,9 +161,19 @@ func handle_ball_steal(new_handler):
 
 		# Set the new handler
 		ball_handler = new_handler
+
+		# Check if teams have changed and handle score reset if needed
+		var score_manager = get_node_or_null("/root/ScoreManager")
+		if score_manager:
+			score_manager.check_ball_possession(new_handler)
 	else:
 		# If there was no previous handler, just set the new one
 		ball_handler = new_handler
+
+		# Update the score manager with the new ball handler
+		var score_manager = get_node_or_null("/root/ScoreManager")
+		if score_manager:
+			score_manager.check_ball_possession(new_handler)
 
 # Show a visual effect when the ball is stolen
 func show_steal_effect():
