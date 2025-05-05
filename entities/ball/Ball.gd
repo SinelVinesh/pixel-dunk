@@ -123,8 +123,8 @@ func handle_ball_steal(new_handler):
 
 	# If the previous handler is a valid player
 	if previous_handler != null:
-		# Check if the current handler is dashing - if so, ignore steal attempt
-		if previous_handler.current_state == previous_handler.PlayerState.DASHING:
+		# Check if the current handler is dashing or if they're on the same team - if so, ignore steal attempt
+		if previous_handler.current_state == previous_handler.PlayerState.DASHING or previous_handler.team_id == new_handler.team_id:
 			return  # Abort steal, ball handler keeps the ball
 
 		# Add previous handler to ignore list
