@@ -57,6 +57,11 @@ class_name Player
 @export var team_id: int = 0
 ## Player ID for identification (1-4)
 @export var player_id: int = 1
+## Speed of the ball when the player shoots
+@export var shoot_speed: float = 1200.0
+## Length of the trajectory curve in SHOOTING state
+@export var trajectory_length: float = 50
+
 ## Input prefix for this player (e.g., "p1_" for player 1)
 var input_prefix: String = ""
 
@@ -67,7 +72,8 @@ enum PlayerState {
 	DASHING,         # Currently performing a dash
 	JUMPING,         # In the air after jumping (first jump)
 	DOUBLE_JUMPING,   # In the air after a second jump
-	DUNKING
+	DUNKING,
+	SHOOTING
 }
 var current_state: int = PlayerState.JUMPING  # Current state of the player
 
@@ -110,6 +116,8 @@ var looking_direction: Vector2 = Vector2.RIGHT  # Direction player is facing
 var dash_pressed: bool = false  # Whether dash button was just pressed
 var jump_pressed: bool = false  # Whether jump button was just pressed
 var pass_pressed: bool = false  # Whether pass button was just pressed
+var shoot_pressed: bool = false
+var shoot_released: bool = false
 
 # Used to store the ball reference
 var ball
@@ -171,6 +179,8 @@ func _physics_process(delta: float) -> void:
 			handle_double_jump(delta)
 		PlayerState.DUNKING:
 			handle_dunk(delta)
+		PlayerState.SHOOTING:
+			handle_shooting(delta)
 
 	# Manage dash cooldown timer - pause when having the ball
 	manage_dash_cooldown()
@@ -228,6 +238,8 @@ func get_input() -> void:
 		jump_pressed = Input.is_action_just_pressed("jump")
 		dash_pressed = Input.is_action_just_pressed("dash")
 		pass_pressed = Input.is_action_just_pressed("pass")
+		shoot_pressed = Input.is_action_pressed("shoot")
+		shoot_released = Input.is_action_just_released("shoot")
 	else:
 		# Prefixed input for multiplayer
 		input_dir.x = Input.get_axis(input_prefix + "move_left", input_prefix + "move_right")
@@ -236,6 +248,8 @@ func get_input() -> void:
 		jump_pressed = Input.is_action_just_pressed(input_prefix + "jump")
 		dash_pressed = Input.is_action_just_pressed(input_prefix + "dash")
 		pass_pressed = Input.is_action_just_pressed(input_prefix + "pass")
+		shoot_pressed = Input.is_action_pressed(input_prefix + "shoot")
+		shoot_released = Input.is_action_just_released(input_prefix + "shoot")
 
 	var raw_move = input_dir.normalized()
 
@@ -347,6 +361,9 @@ func handle_ball_possession(delta: float) -> void:
 	if dash_pressed and dash_count > 0:
 		start_dash()
 
+	if shoot_pressed and current_state != PlayerState.SHOOTING:
+		current_state = PlayerState.SHOOTING
+
 	# Handle passing the ball to teammates
 	if pass_pressed:
 		pass_ball(ball)
@@ -361,6 +378,7 @@ func handle_ball_possession(delta: float) -> void:
 		else:
 			_perform_double_jump()
 			pass
+			
 
 # Handle behavior during a dash (DASHING state)
 func handle_dash(delta: float) -> void:
@@ -706,17 +724,42 @@ func _update_visual_indicators() -> void:
 func update_pass_direction_line(input_dir: Vector2) -> void:
 	if has_ball:
 		pass_direction_line.visible = true
+		
 		var pass_direction = input_dir.normalized()
 		if pass_direction.length() < 0.1:
 			pass_direction = looking_direction
-
-		# Update line points
-		pass_direction_line.points = PackedVector2Array([
-			Vector2.ZERO,
-			pass_direction * 50  # Line length
-		])
+			
+		if current_state != PlayerState.SHOOTING:
+			pass_direction_line.points = PackedVector2Array([
+				Vector2.ZERO,
+				pass_direction * 50  # Line length
+			])
+		else:
+			_draw_trajectory_curve(pass_direction)
 	else:
 		pass_direction_line.visible = false
+
+func _draw_trajectory_curve(direction: Vector2) -> void:
+	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+	var time_step := 0.1
+	var num_points := trajectory_length
+	
+	var points = PackedVector2Array()
+	
+	
+	var position = ball.position - global_position
+	var velocity = direction.normalized() * shoot_speed
+	
+	for i in range(num_points):
+		points.append(position)
+		
+		# Apply velocity to position
+		position += velocity * time_step
+		
+		# Apply gravity to vertical velocity
+		velocity.y += gravity * ball.shoot_gravity_scale * time_step
+	
+	pass_direction_line.points = points
 
 func _on_player_near_hoop(hoop):
 	near_hoop = true
@@ -732,7 +775,6 @@ func handle_dunk(delta: float) -> void:
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed * 0.3, acceleration * delta * 0.5)
 	else:
 		velocity.x = velocity.x * (friction + 0.1)
-
 
 	velocity.y += gravity * 0.5
 	velocity.y = min(velocity.y, max_fall_speed * 0.7)
@@ -780,3 +822,44 @@ func _perform_dunk() -> void:
 		has_ball = false
 		ball._handle_freeze(false, self)
 	)
+	
+func shoot_ball(ball) -> void:
+	# Do nothing if has no ball
+	if not has_ball or not ball:
+		return
+
+	# Get the pass direction from input
+	var shot_direction = Vector2.ZERO
+	if input_prefix.is_empty():
+		shot_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	else: # Multiplayer
+		shot_direction = Input.get_vector(
+			input_prefix + "move_left",
+			input_prefix + "move_right",
+			input_prefix + "move_up",
+			input_prefix + "move_down"
+		)
+
+	# If no input direction, use looking direction
+	if shot_direction.length() < 0.1:
+		shot_direction = looking_direction
+
+	# Normalize the direction
+	shot_direction = shot_direction.normalized()
+
+	# Release the ball
+	has_ball = false
+	ball._handle_freeze(false, self)
+	
+	ball.set_gravity_scale(ball.shoot_gravity_scale)
+
+	# Apply pass velocity to the ball - completely override any previous velocity
+	# This ensures the ball travels exactly in the intended direction without dipping
+	ball.linear_velocity = shot_direction * shoot_speed
+	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
+
+func handle_shooting(delta: float) -> void:
+	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
+	
+	if shoot_released:
+		shoot_ball(ball)
