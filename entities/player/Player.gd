@@ -127,7 +127,7 @@ var shoot_released: bool = false
 # Used to store the ball reference
 var ball
 
-# Animation related var 
+# Animation related var
 var animation_to_wait_for: String = ""
 
 # Signals - Events that other nodes can connect to
@@ -158,7 +158,7 @@ func _ready() -> void:
 
 	# Set up visual indicators for player number and team
 	_update_visual_indicators()
-		
+
 
 # Called every physics frame (~60 times per second)
 func _physics_process(delta: float) -> void:
@@ -380,7 +380,7 @@ func handle_ball_possession(delta: float) -> void:
 	if dash_pressed and dash_count > 0:
 		start_dash()
 
-	if shoot_pressed and current_state != PlayerState.SHOOTING:
+	if shoot_pressed and current_state != PlayerState.SHOOTING and has_ball:
 		current_state = PlayerState.SHOOTING
 
 	# Handle passing the ball to teammates
@@ -469,7 +469,7 @@ func handle_jump(delta: float) -> void:
 	if pass_pressed:
 		pass_ball(ball)
 
-	if shoot_pressed and current_state != PlayerState.SHOOTING:
+	if shoot_pressed and current_state != PlayerState.SHOOTING and has_ball:
 		current_state = PlayerState.SHOOTING
 
 # Handle behavior during a double jump (DOUBLE_JUMPING state)
@@ -497,8 +497,8 @@ func handle_double_jump(delta: float) -> void:
 	# If pass pressed
 	if pass_pressed:
 		pass_ball(ball)
-	
-	if shoot_pressed and current_state != PlayerState.SHOOTING:
+
+	if shoot_pressed and current_state != PlayerState.SHOOTING and has_ball:
 		current_state = PlayerState.SHOOTING
 
 # Start a dash - used by multiple states
@@ -870,6 +870,7 @@ func shoot_ball(ball) -> void:
 	animation_handler("shoot",true)
 	# Do nothing if has no ball
 	if not has_ball or not ball:
+		current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 		return
 
 	# Get the pass direction from input

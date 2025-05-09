@@ -264,7 +264,7 @@ func _unhandled_input(event):
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:
 			# Also close controls panel if open
-			if controls_panel.visible:
+			if controls_panel and controls_panel.visible:
 				controls_panel.visible = false
 
 # Called when score is updated
