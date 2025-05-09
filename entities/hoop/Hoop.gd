@@ -27,4 +27,10 @@ func _on_body_dunk_area_exited(body):
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
 	print(body.shooting_point_factor)
-	$"/root/ScoreManager".add_score_points(body.shooting_team, body.shooting_point_factor) 
+	var team_id = body.shooting_team
+
+	# If the player shoots on his own hoop, the points come to the other team
+	if team_id == team:
+		team_id = 1 - team_id
+
+	$"/root/ScoreManager".add_score_points(team_id, body.shooting_point_factor)
