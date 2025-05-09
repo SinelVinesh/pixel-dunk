@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Pixel Dunk"
-run/main_scene="uid://c3rdlc0cotbpx"
+run/main_scene="uid://cqjdcl176di7l"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"
 
@@ -20,6 +20,11 @@ config/icon="res://icon.svg"
 MultiplayerManager="*res://autoload/MultiplayerManager.tscn"
 ScoreManager="*res://autoload/ScoreManager.tscn"
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
 [layer_names]
 
 2d_physics/layer_2="Player"
@@ -27,4 +32,7 @@ ScoreManager="*res://autoload/ScoreManager.tscn"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="mobile"
+textures/decals/filter=0
+textures/light_projectors/filter=0

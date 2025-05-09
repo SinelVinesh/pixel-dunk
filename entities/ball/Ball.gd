@@ -26,6 +26,9 @@ var previous_handler # Node for the player that previously held the ball
 var previous_passer # Node for the player who last passed the ball
 var handlers_to_ignore = [] # Array of players that temporarily cannot pickup the ball
 
+var shooting_point_factor: int
+var shooting_team: int
+
 # The gravity scale to exaggerate the ball's shooting trajectory
 var shoot_gravity_scale: float = 1.8
 
@@ -197,3 +200,8 @@ func _on_steal_cooldown_timeout():
 	# Remove the previous handler from the ignore list
 	if previous_handler != null and handlers_to_ignore.has(previous_handler):
 		handlers_to_ignore.erase(previous_handler)
+
+# Setting shooting team and point factor
+func set_shooting_team(team: int, point_factor: int) -> void:
+	shooting_team = team
+	shooting_point_factor = point_factor

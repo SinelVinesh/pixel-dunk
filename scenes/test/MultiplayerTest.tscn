@@ -132,9 +132,6 @@ offset_bottom = 10.0
 scale = Vector2(0.25, 0.5)
 shape = SubResource("RectangleShape2D_rj6kv")
 
-[node name="Ball" parent="." instance=ExtResource("3_ksttu")]
-position = Vector2(574, 352)
-
 [node name="SpawnPoints" type="Node2D" parent="."]
 
 [node name="SpawnPoint1" type="Marker2D" parent="SpawnPoints"]
@@ -148,6 +145,10 @@ position = Vector2(454, 248)
 
 [node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(684, 248)
+
+[node name="Ball" parent="." instance=ExtResource("3_ksttu")]
+z_index = 1
+position = Vector2(574, 352)
 
 [node name="UI" type="CanvasLayer" parent="."]
 

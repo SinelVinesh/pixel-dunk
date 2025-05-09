@@ -1,0 +1,356 @@
+[gd_scene load_steps=24 format=3 uid="uid://cwlnp2ihf8k1i"]
+
+[ext_resource type="Script" uid="uid://niqer08blawq" path="res://menus/main_menu/main_menu.gd" id="1_mwimy"]
+[ext_resource type="Shader" uid="uid://dgdao2leal62a" path="res://menus/main_menu/title.gdshader" id="2_uunps"]
+[ext_resource type="Texture2D" uid="uid://dtceda16lf45l" path="res://assets/assets/ui/png/Background/background_rabbit_vs_frog.png" id="3_fqycm"]
+[ext_resource type="Shader" uid="uid://cp1nm5swutu1w" path="res://menus/main_menu/title-title.gdshader" id="4_1tcbg"]
+[ext_resource type="Texture2D" uid="uid://kvqklwl00urd" path="res://assets/assets/ui/png/Title/2x/Title_2x_1.png" id="5_w7567"]
+[ext_resource type="PackedScene" uid="uid://dlhgp46kdr6ee" path="res://menus/GameButton.tscn" id="6_2iufv"]
+[ext_resource type="Texture2D" uid="uid://biatolbwkhxc1" path="res://assets/assets/ui/png/Buttons/Play_Button.png" id="7_f1uao"]
+[ext_resource type="Texture2D" uid="uid://cs4e34jr718xx" path="res://assets/assets/Characters/Amphiball/Frog_01/IDLE/idle_01.png" id="8_8woyc"]
+[ext_resource type="Script" uid="uid://bs0sv4ybg86p6" path="res://menus/main_menu/texture_rect.gd" id="9_d1j5c"]
+[ext_resource type="Texture2D" uid="uid://byisutw8dkhbu" path="res://assets/assets/ui/png/Buttons/Ready_Button.png" id="10_pmi7g"]
+[ext_resource type="Texture2D" uid="uid://cwybmvayfcwqb" path="res://assets/assets/Characters/Amphiball/Frog_02/IDLE/idle_01.png" id="11_sk04l"]
+[ext_resource type="Texture2D" uid="uid://djxu3e0auykwf" path="res://assets/assets/Characters/Rabbeast/Rabbit_01/IDLE/idle_01.png" id="12_11cdn"]
+[ext_resource type="Texture2D" uid="uid://d07jay3b77go0" path="res://assets/assets/Characters/Rabbeast/Rabbit_02/IDLE/idle_01.png" id="13_il6kl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dus5x"]
+shader = ExtResource("2_uunps")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7edc8"]
+shader = ExtResource("4_1tcbg")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_f7ts8"]
+
+[sub_resource type="Animation" id="Animation_81su3"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Title:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Button:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(590, 536)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Button:disabled")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Players:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_f7ts8"]
+resource_name = "to_prematch"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Title:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.566667),
+"transitions": PackedFloat32Array(0.25, 8.28212),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Button:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.2, 0.333333, 0.766667),
+"transitions": PackedFloat32Array(1, 2.63901, 28.84),
+"update": 0,
+"values": [Vector2(590, 536), Vector2(590, 566), Vector2(590, 336)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Button:disabled")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.0333333, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Players:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(1, 1.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_t7kvd"]
+_data = {
+&"RESET": SubResource("Animation_81su3"),
+&"to_prematch": SubResource("Animation_f7ts8")
+}
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h1o7n"]
+atlas = ExtResource("8_8woyc")
+region = Rect2(0, 0, 32, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h4sh0"]
+atlas = ExtResource("11_sk04l")
+region = Rect2(0, 0, 32, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_venjw"]
+atlas = ExtResource("12_11cdn")
+region = Rect2(0, 0, 32, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1gu4"]
+atlas = ExtResource("13_il6kl")
+region = Rect2(0, 0, 32, 0)
+
+[node name="Title" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mwimy")
+
+[node name="Background" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_dus5x")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_fqycm")
+expand_mode = 2
+stretch_mode = 1
+
+[node name="Title" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_7edc8")
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -361.0
+offset_top = -390.0
+offset_right = 359.0
+offset_bottom = 330.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(360, 360)
+texture = ExtResource("5_w7567")
+expand_mode = 1
+
+[node name="Button" parent="." instance=ExtResource("6_2iufv")]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = 176.0
+offset_right = 50.0
+offset_bottom = 224.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.2, 1.2)
+pivot_offset = Vector2(50, 24)
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_f7ts8")
+icon = ExtResource("7_f1uao")
+expand_icon = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_t7kvd")
+}
+
+[node name="Players" type="Control" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Players"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.417
+anchor_right = 1.0
+anchor_bottom = 0.919
+offset_top = -0.240021
+offset_right = 2.0
+offset_bottom = 0.320007
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="P1" type="Control" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Players/HBoxContainer/P1"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 120.0
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Players/HBoxContainer/P1/VBoxContainer"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+texture = SubResource("AtlasTexture_h1o7n")
+script = ExtResource("9_d1j5c")
+spriteHeight = 32
+spriteWidth = 32
+loop = true
+
+[node name="Button2" parent="Players/HBoxContainer/P1/VBoxContainer" instance=ExtResource("6_2iufv")]
+custom_minimum_size = Vector2(120, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_f7ts8")
+icon = ExtResource("10_pmi7g")
+expand_icon = true
+
+[node name="P2" type="Control" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Players/HBoxContainer/P2"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 120.0
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Players/HBoxContainer/P2/VBoxContainer"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+texture = SubResource("AtlasTexture_h4sh0")
+script = ExtResource("9_d1j5c")
+spriteHeight = 32
+spriteWidth = 32
+loop = true
+
+[node name="Button2" parent="Players/HBoxContainer/P2/VBoxContainer" instance=ExtResource("6_2iufv")]
+custom_minimum_size = Vector2(120, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_f7ts8")
+icon = ExtResource("10_pmi7g")
+expand_icon = true
+
+[node name="MarginContainer2" type="MarginContainer" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+
+[node name="P3" type="Control" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Players/HBoxContainer/P3"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 120.0
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Players/HBoxContainer/P3/VBoxContainer"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+texture = SubResource("AtlasTexture_venjw")
+flip_h = true
+script = ExtResource("9_d1j5c")
+spriteHeight = 32
+spriteWidth = 32
+loop = true
+
+[node name="Button2" parent="Players/HBoxContainer/P3/VBoxContainer" instance=ExtResource("6_2iufv")]
+custom_minimum_size = Vector2(120, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_f7ts8")
+icon = ExtResource("10_pmi7g")
+expand_icon = true
+
+[node name="P4" type="Control" parent="Players/HBoxContainer"]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Players/HBoxContainer/P4"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 120.0
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Players/HBoxContainer/P4/VBoxContainer"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+texture = SubResource("AtlasTexture_c1gu4")
+flip_h = true
+script = ExtResource("9_d1j5c")
+spriteHeight = 32
+spriteWidth = 32
+loop = true
+
+[node name="Button2" parent="Players/HBoxContainer/P4/VBoxContainer" instance=ExtResource("6_2iufv")]
+custom_minimum_size = Vector2(120, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_f7ts8")
+icon = ExtResource("10_pmi7g")
+expand_icon = true
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

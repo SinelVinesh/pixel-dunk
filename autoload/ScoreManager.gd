@@ -25,7 +25,7 @@ func _ready():
 func reset_scores() -> void:
 	blue_team_score = 0
 	red_team_score = 0
-	stackable_points = 0
+	stackable_points = 1
 	last_ball_team = -1
 	emit_signal("score_updated", blue_team_score, red_team_score, stackable_points)
 
@@ -35,9 +35,8 @@ func add_pass_points() -> void:
 	emit_signal("score_updated", blue_team_score, red_team_score, stackable_points)
 
 # Add points for scoring (dunk or shoot)
-func add_score_points(team_id: int, is_dunk: bool) -> void:
-	var base_points = dunk_points if is_dunk else shoot_points
-	var total_points = base_points + stackable_points
+func add_score_points(team_id: int, factor: int) -> void:
+	var total_points = stackable_points * factor
 
 	if team_id == 0: # Blue team
 		blue_team_score += total_points
@@ -45,7 +44,7 @@ func add_score_points(team_id: int, is_dunk: bool) -> void:
 		red_team_score += total_points
 
 	# Reset stackable points after scoring
-	stackable_points = 0
+	stackable_points = 1
 	emit_signal("score_updated", blue_team_score, red_team_score, stackable_points)
 
 # Check if ball changed teams and reset stackable points if needed

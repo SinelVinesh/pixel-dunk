@@ -1,6 +1,77 @@
-[gd_scene load_steps=7 format=3 uid="uid://d3ian3udfvyec"]
+[gd_scene load_steps=18 format=3 uid="uid://d3ian3udfvyec"]
 
 [ext_resource type="Script" uid="uid://cxoyoipqy66av" path="res://entities/hoop/Hoop.gd" id="1_8k2ki"]
+[ext_resource type="Texture2D" uid="uid://8v06afmfu21s" path="res://assets/assets/Objects/Hoop/hoop_red.png" id="2_21gaa"]
+[ext_resource type="Texture2D" uid="uid://bpqgfd1hoanqv" path="res://assets/assets/Objects/Hoop/hoop_blue.png" id="3_i15ps"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_250ai"]
+atlas = ExtResource("3_i15ps")
+region = Rect2(0, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_374t4"]
+atlas = ExtResource("3_i15ps")
+region = Rect2(20, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndn2j"]
+atlas = ExtResource("3_i15ps")
+region = Rect2(40, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flsex"]
+atlas = ExtResource("3_i15ps")
+region = Rect2(60, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gt4d2"]
+atlas = ExtResource("2_21gaa")
+region = Rect2(0, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4wuxj"]
+atlas = ExtResource("2_21gaa")
+region = Rect2(20, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_odl6s"]
+atlas = ExtResource("2_21gaa")
+region = Rect2(40, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kda4f"]
+atlas = ExtResource("2_21gaa")
+region = Rect2(60, 0, 20, 20)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_20ixd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_250ai")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_374t4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndn2j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flsex")
+}],
+"loop": true,
+"name": &"hoop_0",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gt4d2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4wuxj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_odl6s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kda4f")
+}],
+"loop": true,
+"name": &"hoop_1",
+"speed": 5.0
+}]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_27ace"]
 size = Vector2(6, 6)
@@ -8,11 +79,8 @@ size = Vector2(6, 6)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8k2ki"]
 size = Vector2(6, 6)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_125t6"]
-size = Vector2(46, 6)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gg05c"]
-size = Vector2(150, 182)
+size = Vector2(110, 63)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_54smv"]
 particle_flag_disable_z = true
@@ -22,6 +90,9 @@ emission_box_extents = Vector3(100, 1, 1)
 direction = Vector3(0, 0, 0)
 gravity = Vector3(0, 0, 0)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_125t6"]
+size = Vector2(30.5, 4)
+
 [node name="Hoop" type="Node2D"]
 script = ExtResource("1_8k2ki")
 
@@ -30,10 +101,12 @@ position = Vector2(-29, -3)
 collision_layer = 16
 collision_mask = 0
 
-[node name="Hoop" type="ColorRect" parent="StaticBody2D"]
-offset_right = 58.0
-offset_bottom = 6.0
-color = Color(1, 0.647059, 0, 1)
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="StaticBody2D"]
+position = Vector2(37, 25)
+scale = Vector2(3.65, 3.65)
+sprite_frames = SubResource("SpriteFrames_20ixd")
+animation = &"hoop_1"
+frame_progress = 0.0579031
 
 [node name="HoopCollision" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(55, 3)
@@ -43,19 +116,27 @@ shape = SubResource("RectangleShape2D_27ace")
 position = Vector2(3, 3)
 shape = SubResource("RectangleShape2D_8k2ki")
 
-[node name="HoopCollision3" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(29, 3)
-rotation = 3.14159
-shape = SubResource("RectangleShape2D_125t6")
-one_way_collision = true
-
 [node name="DunkArea" type="Area2D" parent="."]
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DunkArea"]
+position = Vector2(0, 14.5)
 shape = SubResource("RectangleShape2D_gg05c")
 
 [node name="HoopEffect" type="GPUParticles2D" parent="DunkArea"]
 self_modulate = Color(1.5, 1.5, 1.5, 1)
 amount = 32
 process_material = SubResource("ParticleProcessMaterial_54smv")
+metadata/_edit_lock_ = true
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_mask = 17
+
+[node name="HoopCollision3" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2.53518e-06, 0)
+rotation = 3.14159
+shape = SubResource("RectangleShape2D_125t6")
+
+[connection signal="body_entered" from="DunkArea" to="." method="_on_body_dunk_area_entered"]
+[connection signal="body_exited" from="DunkArea" to="." method="_on_body_dunk_area_exited"]
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
