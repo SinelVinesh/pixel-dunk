@@ -51,6 +51,8 @@ class_name Player
 @export var reset_timer_after_dash: bool = true
 
 @export_group("Game")
+## Character ID: f1 (Frog 1), f2 (Frog 2), r1 (Rabbit 1), r2 (Rabbit 2)
+@export var character_id: String = "f1"
 ## Speed of the ball when passed
 @export var pass_speed: float = 1300.0
 ## Player team (0 = blue team, 1 = red team)
@@ -89,7 +91,6 @@ var dash_timer: float = 0.0        # Time remaining in the current dash
 var coyote_timer: float = 0.0      # Timer for coyote time (jumping after falling)
 var can_coyote_jump: bool = false  # Whether player can use coyote jump
 var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player from flying when the dashing diagonally or upwards, change the method if you find a better solution - Abdoul
-
 # Node references - Links to child nodes in the scene
 @onready var sprite: Sprite2D = $Sprite2D  # Player's visual sprite
 @onready var ground_check: RayCast2D = $GroundCheck  # Ray for detecting ground
@@ -99,6 +100,8 @@ var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer  # Controls animations
 @onready var node_flipper : Node2D = $Node_Flipper # Used to flip its child nodes
 @onready var pass_direction_line: Line2D = $PassDirectionLine # Line showing pass direction
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D # Used to flip the player sprite
+
 
 # Sound effect nodes
 @onready var jump_sound: AudioStreamPlayer = $JumpSound  # Sound when jumping
@@ -106,7 +109,9 @@ var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player 
 @onready var pass_sound: AudioStreamPlayer = $PassSound  # Sound when passing
 
 # Hoop
-@onready var hoop = $"../Hoop"
+@onready var hoop_r: Node2D = $"../HoopR"
+@onready var hoop_f: Node2D = $"../HoopF"
+var hoop: Node2D
 var near_hoop: bool = false
 var current_hoop: Node2D = null
 
@@ -122,9 +127,13 @@ var shoot_released: bool = false
 # Used to store the ball reference
 var ball
 
+# Animation related var 
+var animation_to_wait_for: String = ""
+
 # Signals - Events that other nodes can connect to
 signal dash_used(player)  # Emitted when a dash is used
 signal dash_recharged(player)  # Emitted when a dash is recharged
+
 
 # Called when the node enters the scene tree for the first time
 func _ready() -> void:
@@ -149,9 +158,7 @@ func _ready() -> void:
 
 	# Set up visual indicators for player number and team
 	_update_visual_indicators()
-
-	if hoop:
-		hoop.connect("player_near_hoop", Callable(self, "_on_player_near_hoop"))
+		
 
 # Called every physics frame (~60 times per second)
 func _physics_process(delta: float) -> void:
@@ -245,6 +252,11 @@ func get_input() -> void:
 		input_dir.x = Input.get_axis(input_prefix + "move_left", input_prefix + "move_right")
 		input_dir.y = Input.get_axis(input_prefix + "move_up", input_prefix + "move_down")
 
+		if input_dir.x < 0:
+			animated_sprite.flip_h = true
+		elif input_dir.x > 0:
+			animated_sprite.flip_h = false
+
 		jump_pressed = Input.is_action_just_pressed(input_prefix + "jump")
 		dash_pressed = Input.is_action_just_pressed(input_prefix + "dash")
 		pass_pressed = Input.is_action_just_pressed(input_prefix + "pass")
@@ -273,6 +285,7 @@ func apply_gravity() -> void:
 	var gravity_modifier = 1.0
 
 	if velocity.y > 0:
+		animation_handler("fall")
 		# Falling - apply higher gravity
 		gravity_modifier = fall_gravity_multiplier
 	else:
@@ -297,12 +310,14 @@ func apply_gravity() -> void:
 func handle_free_movement(delta: float) -> void:
 	# Apply movement with acceleration if input is detected
 	if move_direction.length() > 0.1:
+		animation_handler("run")
 		# For horizontal movement
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed, acceleration * delta)
 
 		# Remove ability to control vertical movement in the air
 		# This prevents "flying" in FREE state
 	else:
+		animation_handler("idle")
 		# Apply friction when not moving to slow down
 		velocity.x = velocity.x * friction
 		if !on_ground:
@@ -329,14 +344,17 @@ func handle_free_movement(delta: float) -> void:
 
 # Perform a jump (shared logic for regular and coyote jumps)
 func perform_jump() -> void:
+	animation_handler("jump")
 	velocity.y = -jump_force
 	jump_sound.play()
 	current_state = PlayerState.JUMPING
+
 	can_double_jump = double_jump_enabled
 	can_coyote_jump = false  # Use up coyote jump
 
 # Perform a double jump
 func _perform_double_jump() -> void:
+	animation_handler("double_jump")
 	velocity.y = -jump_force * double_jump_force_multiplier  # Use configurable multiplier
 	jump_sound.play()
 	current_state = PlayerState.DOUBLE_JUMPING
@@ -347,6 +365,7 @@ func handle_ball_possession(delta: float) -> void:
 	# Movement is restricted to dashing only when having the ball
 	# Only apply friction when not in a dash or immediately after a dash
 	if not in_dash and (dash_timer <= 0 or not preserve_dash_momentum_with_ball):
+		animation_handler("carry")
 		velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
 
 	# Only apply vertical friction when in the air
@@ -450,6 +469,9 @@ func handle_jump(delta: float) -> void:
 	if pass_pressed:
 		pass_ball(ball)
 
+	if shoot_pressed and current_state != PlayerState.SHOOTING:
+		current_state = PlayerState.SHOOTING
+
 # Handle behavior during a double jump (DOUBLE_JUMPING state)
 func handle_double_jump(delta: float) -> void:
 	# Similar to regular jump, but with even less control using the configurable multiplier
@@ -475,9 +497,13 @@ func handle_double_jump(delta: float) -> void:
 	# If pass pressed
 	if pass_pressed:
 		pass_ball(ball)
+	
+	if shoot_pressed and current_state != PlayerState.SHOOTING:
+		current_state = PlayerState.SHOOTING
 
 # Start a dash - used by multiple states
 func start_dash() -> void:
+	animation_handler("dash")
 	# For dashing, we want to use the raw input direction to allow diagonal dashes,
 	# if multiplayer, we have a prefix like "p1_"
 	var dash_input: Vector2
@@ -570,6 +596,7 @@ func pass_ball(ball) -> void:
 
 	# Get the pass direction from input
 	var pass_direction = Vector2.ZERO
+	animation_handler("pass",true)
 	if input_prefix.is_empty():
 		pass_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	else: # Multiplayer
@@ -765,6 +792,7 @@ func _draw_trajectory_curve(direction: Vector2) -> void:
 	pass_direction_line.points = points
 
 func _on_player_near_hoop(hoop):
+	print("Player near hoop")
 	near_hoop = true
 	current_hoop = hoop
 
@@ -785,6 +813,7 @@ func handle_dunk(delta: float) -> void:
 	apply_gravity()
 
 func _perform_dunk() -> void:
+	print("Performing dunk")
 	if not has_ball or not near_hoop or current_hoop == null:
 		return
 
@@ -828,7 +857,7 @@ func _perform_dunk() -> void:
 		# Add score for the dunk
 		var score_manager = get_node_or_null("/root/ScoreManager")
 		if score_manager:
-			score_manager.add_score_points(team_id, true) # true = is a dunk
+			score_manager.add_score_points(team_id, 3)
 
 		# Return to normal state after small delay
 		var return_timer = get_tree().create_timer(0.5)
@@ -838,6 +867,7 @@ func _perform_dunk() -> void:
 	)
 
 func shoot_ball(ball) -> void:
+	animation_handler("shoot",true)
 	# Do nothing if has no ball
 	if not has_ball or not ball:
 		return
@@ -872,13 +902,36 @@ func shoot_ball(ball) -> void:
 	ball.linear_velocity = shot_direction * shoot_speed
 	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 
-	# Add score for the shot
-	var score_manager = get_node_or_null("/root/ScoreManager")
-	if score_manager:
-		score_manager.add_score_points(team_id, false) # false = is not a dunk, but a shot
+	var shooting_point_factor = 1
+	# If the player shoot from the over end of the field set the shooting point factor to 2
+	print("Distance from hoop: ", abs(position.x - hoop.position.x))
+	print("Distance from hoop_f: ", abs(position.x - hoop_f.position.x))
+	print("Distance from hoop_r: ", abs(position.x - hoop_r.position.x))
+	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x)/2:
+		shooting_point_factor = 2
+	ball.set_shooting_team(team_id, shooting_point_factor)
+
 
 func handle_shooting(delta: float) -> void:
+	animation_handler("aim")
 	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
-
+	apply_gravity()
 	if shoot_released:
 		shoot_ball(ball)
+
+func animation_handler(animation_name: String, wait_for_animation: bool = false) -> void:
+	var complete_animation_name = animation_name + "_" + "%d" % ((team_id + 1) % 2)
+	if animated_sprite.is_playing() and animated_sprite.animation == animation_to_wait_for :
+		return
+	else :
+		animation_to_wait_for = ""
+	if animated_sprite.animation != complete_animation_name :
+		animated_sprite.play(complete_animation_name)
+		if wait_for_animation:
+			animation_to_wait_for = complete_animation_name
+
+func assign_hoop() -> void:
+	# Get HoopF if Team.FROG, HoopR if Team.RABBIT
+	hoop = hoop_f if team_id == 0 else hoop_r
+	hoop.connect("player_near_hoop", Callable(self, "_on_player_near_hoop"))
+	print("Assigning hoop to player ", self, " with hoop: ", hoop)

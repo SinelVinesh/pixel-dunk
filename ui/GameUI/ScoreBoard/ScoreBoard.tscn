@@ -1,0 +1,178 @@
+[gd_scene load_steps=11 format=3 uid="uid://xvexedkptltf"]
+
+[ext_resource type="Texture2D" uid="uid://ljxooi6fo6c1" path="res://assets/assets/ui/png/frame/Score_board.png" id="1_gftla"]
+[ext_resource type="Script" uid="uid://bbuo2btkyx0va" path="res://ui/GameUI/ScoreBoard/score_board.gd" id="1_mtcdb"]
+[ext_resource type="Texture2D" uid="uid://5pkb0pws8n46" path="res://assets/assets/ui/png/Icons/Frog/1x/Icon_Frog_1.png" id="2_lflkl"]
+[ext_resource type="Texture2D" uid="uid://c2u3vo5n71i8w" path="res://assets/assets/ui/png/Icons/Rabbit/1x/Icon_Rabbit_1.png" id="3_yovpp"]
+[ext_resource type="LabelSettings" uid="uid://dyujgmeby0p56" path="res://ui/fonts/FrogFont.tres" id="4_ipatr"]
+[ext_resource type="FontFile" uid="uid://du27qnmxyk7a1" path="res://assets/assets/fonts/EnterCommand-Bold.ttf" id="4_yovpp"]
+[ext_resource type="LabelSettings" uid="uid://c4f2yjbq8vd7a" path="res://ui/fonts/RabbitFont.tres" id="6_l4nc5"]
+[ext_resource type="LabelSettings" uid="uid://x8l42k6pclo0" path="res://ui/fonts/NumberFont.tres" id="7_l4nc5"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_mtcdb"]
+font = ExtResource("4_yovpp")
+
+[sub_resource type="LabelSettings" id="LabelSettings_l4nc5"]
+font = ExtResource("4_yovpp")
+font_size = 32
+
+[node name="ScoreBoard" type="Control"]
+layout_mode = 3
+anchor_right = 0.185156
+anchor_bottom = 0.148611
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(116, 57)
+script = ExtResource("1_mtcdb")
+metadata/_edit_use_anchors_ = true
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.996
+anchor_bottom = 1.009
+offset_right = -0.0520172
+offset_bottom = 0.0369949
+texture = ExtResource("1_gftla")
+metadata/_edit_use_anchors_ = true
+
+[node name="FrogIcon" type="TextureRect" parent="Background"]
+layout_mode = 2
+anchor_left = 0.154
+anchor_top = 0.253
+anchor_right = 0.154
+anchor_bottom = 0.253
+offset_left = -19.344
+offset_top = -20.324
+offset_right = 17.656
+offset_bottom = 17.676
+texture = ExtResource("2_lflkl")
+
+[node name="RabbitIcon" type="TextureRect" parent="Background"]
+layout_mode = 2
+anchor_left = 0.853
+anchor_top = 0.25
+anchor_right = 0.853
+anchor_bottom = 0.25
+offset_left = -23.308
+offset_top = -19.0
+offset_right = 14.692
+offset_bottom = 19.0
+texture = ExtResource("3_yovpp")
+
+[node name="T1_Title" type="Label" parent="Background"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+anchor_left = 0.153
+anchor_top = 0.565
+anchor_right = 0.153
+anchor_bottom = 0.565
+offset_left = -36.108
+offset_top = -7.016
+offset_right = 35.892
+offset_bottom = 6.984
+text = "FROGS"
+label_settings = ExtResource("4_ipatr")
+horizontal_alignment = 1
+
+[node name="Time_Title" type="Label" parent="Background"]
+custom_minimum_size = Vector2(82, 0)
+layout_mode = 2
+anchor_left = 0.5
+anchor_top = 0.565
+anchor_right = 0.5
+anchor_bottom = 0.565
+offset_left = -42.0
+offset_top = -7.02
+offset_right = 40.0
+offset_bottom = 6.98
+text = "TIME"
+label_settings = SubResource("LabelSettings_mtcdb")
+horizontal_alignment = 1
+
+[node name="T2_Title" type="Label" parent="Background"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+anchor_left = 0.843
+anchor_top = 0.565
+anchor_right = 0.843
+anchor_bottom = 0.565
+offset_left = -35.948
+offset_top = -7.02
+offset_right = 36.052
+offset_bottom = 6.98
+text = "RABBIT"
+label_settings = ExtResource("6_l4nc5")
+horizontal_alignment = 1
+
+[node name="T1_Score" type="Label" parent="Background"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+anchor_left = 0.161
+anchor_top = 0.792
+anchor_right = 0.161
+anchor_bottom = 0.792
+offset_left = -38.996
+offset_top = -14.536
+offset_right = 37.004
+offset_bottom = 13.464
+text = "00"
+label_settings = ExtResource("7_l4nc5")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Potential_Score" type="Label" parent="Background"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+anchor_left = 0.5
+anchor_top = 0.273
+anchor_right = 0.5
+anchor_bottom = 0.273
+offset_left = -38.0
+offset_top = -21.484
+offset_right = 38.0
+offset_bottom = 19.516
+text = "00"
+label_settings = SubResource("LabelSettings_l4nc5")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Time_Value" type="Label" parent="Background"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+anchor_left = 0.5
+anchor_top = 0.782
+anchor_right = 0.5
+anchor_bottom = 0.782
+offset_left = -41.0
+offset_top = -14.456
+offset_right = 43.0
+offset_bottom = 26.544
+text = "00:00"
+label_settings = ExtResource("7_l4nc5")
+horizontal_alignment = 1
+
+[node name="T2_Score" type="Label" parent="Background"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+anchor_left = 0.843
+anchor_top = 0.782
+anchor_right = 0.843
+anchor_bottom = 0.782
+offset_left = -34.948
+offset_top = -13.456
+offset_right = 37.052
+offset_bottom = 14.544
+text = "00"
+label_settings = ExtResource("7_l4nc5")
+horizontal_alignment = 1
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 120.0
+one_shot = true
+autostart = true
+
+[node name="RefreshTimer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="RefreshTimer" to="." method="_update_timer"]
