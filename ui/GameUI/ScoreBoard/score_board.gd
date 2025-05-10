@@ -2,6 +2,10 @@ extends Control
 
 var score_manager: Node
 
+@onready var blue_label = $Background/T2_Score
+@onready var red_label = $Background/T1_Score
+@onready var combo_label = $Background/Potential_Score
+
 func _ready():
 	# Get the ScoreManager singleton
 	_update_timer() 
@@ -11,11 +15,9 @@ func _ready():
 	else:
 	# Connect to score updated signal
 		score_manager.score_updated.connect(_on_score_updated)
+		combo_label.text = "01"
 
 func _on_score_updated(blue_score: int, red_score: int, stackable: int):
-	var blue_label = $Background/T2_Score
-	var red_label = $Background/T1_Score
-	var combo_label = $Background/Potential_Score
 
 	if blue_label:
 		blue_label.text = "%02d" % blue_score
