@@ -615,6 +615,10 @@ func pass_ball(ball) -> void:
 	pass_direction = pass_direction.normalized()
 
 	# Release the ball
+	var shooting_point_factor = 1
+	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x)/2:
+		shooting_point_factor = 2
+	ball.set_shooting_team(team_id, shooting_point_factor)
 	has_ball = false
 	ball._handle_freeze(false, self)
 

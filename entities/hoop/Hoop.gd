@@ -14,6 +14,10 @@ signal player_near_hoop(body)
 func _ready():
 	area.connect("body_entered", Callable(self, "_on_body_dunk_area_entered"))
 	area.connect("body_exited", Callable(self, "_on_body_dunk_area_exited"))
+	if team == 1 :
+		$StaticBody2D/BackCollision.position.x = 9
+		$StaticBody2D/FrontCollision.position.x = 69
+		$GoalArea.position.x = 14
 	$StaticBody2D/AnimatedSprite2D.play("hoop_%s" % team)
 
 func _on_body_dunk_area_entered(body):
@@ -26,11 +30,14 @@ func _on_body_dunk_area_exited(body):
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	print(body.shooting_point_factor)
-	var team_id = body.shooting_team
+	if body is Ball :
+		var from_above = body.linear_velocity.y > 1
+		if from_above :
+			print("Shoot from above")
+			var team_id = body.shooting_team
 
-	# If the player shoots on his own hoop, the points come to the other team
-	if team_id == team:
-		team_id = 1 - team_id
+			# If the player shoots on his own hoop, the points come to the other team
+			if team_id == team:
+				team_id = 1 - team_id
 
-	$"/root/ScoreManager".add_score_points(team_id, body.shooting_point_factor)
+			$"/root/ScoreManager".add_score_points(team_id, body.shooting_point_factor)
