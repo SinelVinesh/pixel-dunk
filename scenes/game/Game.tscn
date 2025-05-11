@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://03bo43seuy2d"]
+[gd_scene load_steps=15 format=3 uid="uid://03bo43seuy2d"]
 
 [ext_resource type="Script" uid="uid://b7eln5k22n1lt" path="res://scenes/game/Game.gd" id="1_m44fu"]
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="2_7qcb4"]
@@ -12,6 +12,12 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(941.638, 59.8007)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aptqa"]
+size = Vector2(730, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gynul"]
+size = Vector2(740, 36)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qf6a8"]
 size = Vector2(52, 187)
@@ -123,7 +129,7 @@ offset_bottom = 10.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
 scale = Vector2(0.2, 0.5)
-shape = SubResource("RectangleShape2D_rj6kv")
+shape = SubResource("RectangleShape2D_aptqa")
 
 [node name="Platform2" type="StaticBody2D" parent="."]
 z_index = 1
@@ -139,7 +145,7 @@ offset_bottom = 10.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
 scale = Vector2(0.2, 0.5)
-shape = SubResource("RectangleShape2D_rj6kv")
+shape = SubResource("RectangleShape2D_gynul")
 
 [node name="Platform3" type="StaticBody2D" parent="."]
 z_index = 1

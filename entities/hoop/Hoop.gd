@@ -10,8 +10,6 @@ enum Team {
 @export var team: Team = Team.FROG
 
 func _ready():
-	area.connect("body_entered", Callable(self, "_on_body_dunk_area_entered"))
-	area.connect("body_exited", Callable(self, "_on_body_dunk_area_exited"))
 	if team == 1 :
 		$StaticBody2D/BackCollision.position.x = 9
 		$StaticBody2D/FrontCollision.position.x = 69
