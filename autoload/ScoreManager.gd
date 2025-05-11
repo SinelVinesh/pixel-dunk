@@ -15,6 +15,7 @@ var last_ball_team: int = -1 # -1 = no team has the ball yet
 
 # Score signals
 signal score_updated(blue_score: int, red_score: int, stackable: int)
+signal scored_by_team(team_id: int)
 
 # Called when the node enters the scene tree
 func _ready():
@@ -46,6 +47,7 @@ func add_score_points(team_id: int, factor: int) -> void:
 	# Reset stackable points after scoring
 	stackable_points = 1
 	emit_signal("score_updated", blue_team_score, red_team_score, stackable_points)
+	emit_signal("scored_by_team", team_id)
 
 # Check if ball changed teams and reset stackable points if needed
 func check_ball_possession(ball_handler) -> void:

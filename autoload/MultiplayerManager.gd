@@ -120,6 +120,8 @@ func assign_controller_to_player(player_idx: int, device_idx: int):
 	# Store the device assignment
 	player_devices[player_idx] = device_idx
 
+	for action in actions:
+		InputMap.action_erase_events(player_prefix + action)
 	# Movement - Left stick and D-pad
 	add_joy_axis_event(player_prefix + "move_left", device_idx, JOY_AXIS_LEFT_X, -1.0)
 	add_joy_button_event(player_prefix + "move_left", device_idx, JOY_BUTTON_DPAD_LEFT)

@@ -31,6 +31,7 @@ var shooting_team: int
 
 # The gravity scale to exaggerate the ball's shooting trajectory
 var shoot_gravity_scale: float = 1.8
+var team_to_ignore: int = -1
 
 #On ball spawn
 func _ready() -> void:
@@ -44,6 +45,8 @@ func _ready() -> void:
 		steal_cooldown_timer = timer
 
 	steal_cooldown_timer.timeout.connect(_on_steal_cooldown_timeout)
+
+	$"/root/ScoreManager".connect("scored_by_team",_on_scored_by_team)
 
 	#Initially launch ball to the right
 	#linear_velocity = Vector2(300, -0) #For test
@@ -193,7 +196,11 @@ func show_steal_effect():
 
 # Check if a player can pick up the ball
 func can_pickup(player) -> bool:
-	return not handlers_to_ignore.has(player)
+	var result = not handlers_to_ignore.has(player) and team_to_ignore != player.team_id
+	# If the ball is picked up by the other team, allow the scoring team to pick it again
+	if result :
+		team_to_ignore = -1
+	return result
 
 # Called when the steal cooldown timer times out
 func _on_steal_cooldown_timeout():
@@ -203,3 +210,8 @@ func _on_steal_cooldown_timeout():
 func set_shooting_team(team: int, point_factor: int) -> void:
 	shooting_team = team
 	shooting_point_factor = point_factor
+
+func _on_scored_by_team(team_id: int) -> void:
+	linear_velocity.y = 0
+	linear_velocity.x = 0
+	team_to_ignore = team_id
