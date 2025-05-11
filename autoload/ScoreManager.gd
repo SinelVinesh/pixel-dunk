@@ -61,7 +61,7 @@ func check_ball_possession(ball_handler) -> void:
 
 	# If ball changed to the opposite team, reset stackable points
 	if current_team != last_ball_team:
-		stackable_points = 0
+		stackable_points = int(float(stackable_points) / 2)
 		emit_signal("score_updated", blue_team_score, red_team_score, stackable_points)
 
 	# Update the last team that had the ball
