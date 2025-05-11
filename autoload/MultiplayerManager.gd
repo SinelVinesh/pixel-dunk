@@ -18,6 +18,10 @@ var player_devices: Dictionary = {} # Maps player index to input device index
 const DEVICE_KEYBOARD = -1
 const FIRST_CONTROLLER = 0
 
+const actions = [
+		"move_left", "move_right", "move_up", "move_down",
+		"jump", "dash", "pass", "shoot"
+	]
 # Called when the node enters the scene tree for the first time
 func _ready():
 	# Setup input actions if they haven't been set up yet
@@ -32,11 +36,6 @@ func _ready():
 
 # Setup the input map actions for all players
 func setup_input_map():
-	# Define all the actions we'll use
-	var actions = [
-		"move_left", "move_right", "move_up", "move_down",
-		"jump", "dash", "pass", "shoot"
-	]
 
 	# Create player-specific actions
 	for player_idx in range(1, max_players + 1):
@@ -229,6 +228,17 @@ func _on_joy_connection_changed(device_idx: int, connected: bool):
 		print("Controller connected: ", device_idx, " - ", Input.get_joy_name(device_idx))
 	else:
 		print("Controller disconnected: ", device_idx)
+		disconnect_device(device_idx)
 
 	# Reconfigure player inputs when controllers change
 	configure_player_inputs()
+
+func disconnect_device(device_idx):
+	var player: String
+	for player_idx in player_devices.keys():
+		if player_devices[player_idx] == device_idx:
+			player = "p{0}_".format([player_idx])
+			player_devices.erase(player_idx)
+	
+	for action in actions:
+		InputMap.action_erase_events(player + action)
