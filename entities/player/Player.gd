@@ -795,13 +795,14 @@ func _draw_trajectory_curve(direction: Vector2) -> void:
 
 	pass_direction_line.points = points
 
-func _on_player_near_hoop(hoop):
-	print("Player near hoop")
+func player_near_hoop(param_hoop):
+	print("Player :", player_id, " near hoop: ", param_hoop)
 	near_hoop = true
-	current_hoop = hoop
+	current_hoop = param_hoop
 
-func _on_player_left_hoop(hoop):
-	if current_hoop == hoop:
+func player_left_hoop(param_hoop):
+	print("Player :", player_id, " left hoop: ", param_hoop)
+	if current_hoop == param_hoop:
 		near_hoop = false
 		current_hoop = null
 
@@ -938,5 +939,3 @@ func animation_handler(animation_name: String, wait_for_animation: bool = false)
 func assign_hoop() -> void:
 	# Get HoopF if Team.FROG, HoopR if Team.RABBIT
 	hoop = hoop_f if team_id == 0 else hoop_r
-	hoop.connect("player_near_hoop", Callable(self, "_on_player_near_hoop"))
-	print("Assigning hoop to player ", self, " with hoop: ", hoop)
