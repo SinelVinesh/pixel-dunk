@@ -6,13 +6,6 @@ extends Node2D
 # Configuration variables
 var max_players: int = 4  # Fixed at 4 players for 2v2
 
-# References to UI elements
-@onready var controllers_label: Label = $UI/ConfigPanel/ControllersLabel
-@onready var game_status_label: Label = $UI/GameStatusLabel
-@onready var controls_panel: Panel = $UI/ControlsPanel
-@onready var controls_button: Button = $UI/ControlsButton
-@onready var close_button: Button = $UI/ControlsPanel/CloseButton
-@onready var reset_button: Button = $UI/ConfigPanel/ResetButton
 
 # Game state
 var game_running: bool = false
@@ -34,14 +27,6 @@ func _ready():
 		push_error("MultiplayerManager autoload not found!")
 		return
 
-	# Get the ScoreManager singleton
-	score_manager = get_node("/root/ScoreManager")
-	if not score_manager:
-		push_error("ScoreManager autoload not found!")
-	else:
-		# Connect to score updated signal
-		score_manager.score_updated.connect(_on_score_updated)
-
 
 	# Configure multiplayer manager with 4 players for 2v2
 	multiplayer_manager.max_players = max_players
@@ -53,9 +38,6 @@ func _ready():
 	# Start the game automatically
 	_start_game()
 
-	# Make sure initial score is displayed
-	if score_manager:
-		_on_score_updated(score_manager.blue_team_score, score_manager.red_team_score, score_manager.stackable_points)
 
 # Process function for gameplay
 func _process(delta):
@@ -63,16 +45,6 @@ func _process(delta):
 	# Update dash indicators
 	if game_running:
 		_update_dash_indicators()
-
-# Show controls panel
-func _on_controls_button_pressed():
-	controls_panel.visible = true
-	controls_button.release_focus()
-
-# Hide controls panel
-func _on_close_button_pressed():
-	controls_panel.visible = false
-	close_button.release_focus()
 
 # Reset the scene
 func _on_reset_button_pressed():
@@ -135,7 +107,7 @@ func _create_dash_indicators():
 	_clear_dash_indicators()
 
 	# Create a panel for dash indicators if it doesn't exist
-	var dash_panel = $UI.get_node_or_null("DashPanel")
+	var dash_panel = $BackUI.get_node_or_null("DashPanel")
 	if not dash_panel:
 		dash_panel = Panel.new()
 		dash_panel.name = "DashPanel"
@@ -150,7 +122,7 @@ func _create_dash_indicators():
 		style.corner_radius_bottom_left = 5
 		dash_panel.add_theme_stylebox_override("panel", style)
 
-		$UI.add_child(dash_panel)
+		$BackUI.add_child(dash_panel)
 
 	# Add title label
 	var title_label = dash_panel.get_node_or_null("TitleLabel")
@@ -214,7 +186,7 @@ func _clear_dash_indicators():
 			indicator.queue_free()
 	dash_indicators.clear()
 
-	var dash_panel = $UI.get_node_or_null("DashPanel")
+	var dash_panel = $BackUI.get_node_or_null("DashPanel")
 	if dash_panel:
 		for child in dash_panel.get_children():
 			if child.name != "TitleLabel":
@@ -231,15 +203,9 @@ func _reset_game():
 	# Clear dash indicators
 	_clear_dash_indicators()
 
-	# Update player count display
-	game_status_label.text = "Players: 0"
-
 	# Reset scores
 	if score_manager:
 		score_manager.reset_scores()
-
-	# Release focus from the button
-	reset_button.release_focus()
 
 	# Reset the ball
 	var ball = get_node_or_null("Ball")
@@ -257,27 +223,3 @@ func _clear_existing_players():
 		if is_instance_valid(player):
 			player.queue_free()
 	multiplayer_manager.active_players.clear()
-
-# Called when an input event occurs
-func _unhandled_input(event):
-	# Clear focus when Escape is pressed
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_ESCAPE:
-			# Also close controls panel if open
-			if controls_panel and controls_panel.visible:
-				controls_panel.visible = false
-
-# Called when score is updated
-func _on_score_updated(blue_score: int, red_score: int, stackable: int):
-	var blue_label = $UI/ScorePanel/BlueTeamLabel
-	var red_label = $UI/ScorePanel/RedTeamLabel
-	var combo_label = $UI/ScorePanel/ComboLabel
-
-	if blue_label:
-		blue_label.text = "Blue Team: " + str(blue_score)
-
-	if red_label:
-		red_label.text = "Red Team: " + str(red_score)
-
-	if combo_label:
-		combo_label.text = "Combo Points: " + str(stackable)

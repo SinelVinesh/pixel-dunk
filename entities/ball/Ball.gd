@@ -197,9 +197,7 @@ func can_pickup(player) -> bool:
 
 # Called when the steal cooldown timer times out
 func _on_steal_cooldown_timeout():
-	# Remove the previous handler from the ignore list
-	if previous_handler != null and handlers_to_ignore.has(previous_handler):
-		handlers_to_ignore.erase(previous_handler)
+	handlers_to_ignore = []
 
 # Setting shooting team and point factor
 func set_shooting_team(team: int, point_factor: int) -> void:

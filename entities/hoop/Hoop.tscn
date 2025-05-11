@@ -134,6 +134,7 @@ position = Vector2(-2, -1)
 collision_mask = 16
 
 [node name="HoopCollision3" type="CollisionShape2D" parent="GoalArea"]
+position = Vector2(0, 4)
 rotation = 3.14159
 shape = SubResource("RectangleShape2D_125t6")
 
