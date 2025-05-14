@@ -1,9 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bdshg1dmyjq1e"]
 
-[ext_resource type="Script" path="res://autoload/ScoreManager.gd" id="1_vfvq5"]
+[ext_resource type="Script" uid="uid://bh4gqt7x4xawp" path="res://autoload/ScoreManager.gd" id="1_vfvq5"]
 
 [node name="ScoreManager" type="Node"]
 script = ExtResource("1_vfvq5")
-dunk_points = 2
-shoot_points = 3
-pass_points = 1

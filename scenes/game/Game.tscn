@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://03bo43seuy2d"]
+[gd_scene load_steps=16 format=3 uid="uid://03bo43seuy2d"]
 
 [ext_resource type="Script" uid="uid://b7eln5k22n1lt" path="res://scenes/game/Game.gd" id="1_m44fu"]
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="2_7qcb4"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://xvexedkptltf" path="res://ui/GameUI/ScoreBoard/ScoreBoard.tscn" id="5_qf6a8"]
 [ext_resource type="Texture2D" uid="uid://b6pprbakc2y5p" path="res://assets/assets/Objects/platforms/Center_002.png" id="5_wnrko"]
 [ext_resource type="PackedScene" uid="uid://d3ian3udfvyec" path="res://entities/hoop/Hoop.tscn" id="6_365ku"]
+[ext_resource type="AudioStream" uid="uid://dd1ksjvc3jebk" path="res://assets/assets/audio/mixkit-basketball-buzzer-1647.wav" id="10_56wml"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(941.638, 59.8007)
@@ -199,3 +200,7 @@ team = 0
 z_index = 1
 position = Vector2(49, 331)
 scale = Vector2(1.5, 1.5)
+
+[node name="Buzzer" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("10_56wml")
+volume_db = -10.0

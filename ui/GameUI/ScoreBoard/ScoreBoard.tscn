@@ -167,12 +167,8 @@ text = "00"
 label_settings = ExtResource("7_l4nc5")
 horizontal_alignment = 1
 
-[node name="Timer" type="Timer" parent="."]
-wait_time = 120.0
-one_shot = true
-autostart = true
-
 [node name="RefreshTimer" type="Timer" parent="."]
+wait_time = 0.5
 autostart = true
 
 [connection signal="timeout" from="RefreshTimer" to="." method="_update_timer"]

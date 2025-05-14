@@ -19,8 +19,12 @@ var score_manager: Node
 # Dash indicators references
 var dash_indicators = []
 
+# Game ending factors
+var slow_time: bool = false
+
 # Called when the node enters the scene tree for the first time
 func _ready():
+	GameManager.time_over.connect(end_game)
 	# Get the MultiplayerManager singleton
 	multiplayer_manager = get_node("/root/MultiplayerManager")
 	if not multiplayer_manager:
@@ -41,10 +45,15 @@ func _ready():
 
 # Process function for gameplay
 func _process(delta):
-
 	# Update dash indicators
 	if game_running:
 		_update_dash_indicators()
+	if slow_time and Engine.time_scale > 0.1 :
+		Engine.time_scale = lerp(Engine.time_scale, 0.05, delta*7)
+		if Engine.time_scale <= 0.1 :
+			GameManager.emit_game_ended()
+			Engine.time_scale = 1
+		
 
 # Reset the scene
 func _on_reset_button_pressed():
@@ -62,6 +71,8 @@ func _update_spawn_points():
 
 # Start or restart the game
 func _start_game():
+	# Reset Scores
+	ScoreManager.reset_scores()
 	# Clear any existing players
 	_clear_existing_players()
 
@@ -97,9 +108,9 @@ func _start_game():
 
 	# Connect dash signals from all players
 	_connect_player_signals()
-
 	# Start the game
 	game_running = true
+	GameManager.start_game()
 
 # Create dash indicators for each player
 func _create_dash_indicators():
@@ -223,3 +234,7 @@ func _clear_existing_players():
 		if is_instance_valid(player):
 			player.queue_free()
 	multiplayer_manager.active_players.clear()
+
+func end_game():
+	$Buzzer.play()
+	slow_time = true

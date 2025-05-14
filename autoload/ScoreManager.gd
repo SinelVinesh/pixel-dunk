@@ -68,3 +68,11 @@ func check_ball_possession(ball_handler) -> void:
 
 	# Update the last team that had the ball
 	last_ball_team = current_team
+
+func get_winner() -> Constants.Team:
+	if blue_team_score > red_team_score :
+		return Constants.Team.RABBIT
+	elif blue_team_score < red_team_score :
+		return Constants.Team.FROG
+	else :
+		return Constants.Team.NONE

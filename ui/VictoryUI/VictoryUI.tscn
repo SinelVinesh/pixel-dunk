@@ -1,0 +1,59 @@
+[gd_scene load_steps=4 format=3 uid="uid://drlp1tpg4fbtt"]
+
+[ext_resource type="Script" uid="uid://ceoim8mtj1mrr" path="res://ui/VictoryUI/victory_ui.gd" id="1_68kg4"]
+[ext_resource type="FontFile" uid="uid://dnylaqv8dbvq8" path="res://ui/fonts/EnterCommand-Bold.ttf" id="1_m4nb7"]
+[ext_resource type="SpriteFrames" uid="uid://beafu2c5l08tq" path="res://entities/player/assets/PlayerAnimation.tres" id="3_1m2pw"]
+
+[node name="VictoryUi" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_68kg4")
+
+[node name="Background" type="TextureRect" parent="."]
+modulate = Color(0.525101, 0.525101, 0.525101, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 2
+
+[node name="VictoryText" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -459.0
+offset_top = -127.0
+offset_right = 461.0
+offset_bottom = -71.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("1_m4nb7")
+theme_override_font_sizes/normal_font_size = 56
+bbcode_enabled = true
+text = "[wave amp=40.0 freq=10.0 connected=1][color=#ff0044]{TEAM} WINS ![/color][/wave]"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Winner1" type="AnimatedSprite2D" parent="."]
+position = Vector2(451, 451.25)
+scale = Vector2(7.45313, 7.45313)
+sprite_frames = ExtResource("3_1m2pw")
+animation = &"carry_0"
+frame_progress = 0.143967
+
+[node name="Winner2" type="AnimatedSprite2D" parent="."]
+position = Vector2(841, 451.25)
+scale = Vector2(7.45313, 7.45313)
+sprite_frames = ExtResource("3_1m2pw")
+animation = &"carry_0"
+frame_progress = 0.608571
+flip_h = true

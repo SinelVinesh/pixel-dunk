@@ -8,7 +8,6 @@ var score_manager: Node
 
 func _ready():
 	# Get the ScoreManager singleton
-	_update_timer() 
 	score_manager = get_node("/root/ScoreManager")
 	if not score_manager:
 		push_error("ScoreManager autoload not found!")
@@ -30,7 +29,8 @@ func _on_score_updated(blue_score: int, red_score: int, stackable: int):
 
 func _update_timer():
 	var timer_label = $Background/Time_Value
+	var time_left = GameManager.get_time_left()
 	if timer_label:
-		var minute_left = int($Timer.time_left / 60)
-		var second_left = int($Timer.time_left) % 60
+		var minute_left = int(time_left / 60)
+		var second_left = int(time_left) % 60
 		timer_label.text = "%02d:%02d" % [minute_left, second_left]
