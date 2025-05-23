@@ -858,6 +858,7 @@ func _perform_dunk() -> void:
 		ball.get_node('Area2D').set_monitorable(false)
 		has_ball = false
 		ball._handle_freeze(false, self)
+		ball.set_shooting_team(team_id, 0)
 
 		# Add score for the dunk
 		var score_manager = get_node_or_null("/root/ScoreManager")
