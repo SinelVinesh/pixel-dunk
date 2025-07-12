@@ -772,9 +772,7 @@ func update_pass_direction_line(input_dir: Vector2) -> void:
 				pass_direction * 50  # Line length
 			])
 		else:
-			#_draw_trajectory_curve(shoot_direction)
 			_draw_trajectory_curve_raycast(shoot_direction)
-			# pass_direction_line.width = ball.ball_radius * 2
 	else:
 		pass_direction_line.visible = false
 
@@ -799,7 +797,7 @@ func _draw_trajectory_curve(direction: Vector2) -> void:
 	pass_direction_line.points = points
 	
 func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
-	print("Recorded direction from draw curve: ", direction)
+	#print("Recorded direction from draw curve: ", direction)
 	var space_state = get_world_2d().direct_space_state
 	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 	var time_step := 0.1
@@ -814,25 +812,24 @@ func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
 	
 	var mass = ball.mass 
 	
+	var next_pt_bounce = false
+	
 	for i in range(num_points):
-		points.append(position)
+		if (!next_pt_bounce): points.append(position)
 
-		# Apply gravity to vertical velocity
 		velocity.y += gravity * time_step * ball.shoot_gravity_scale
-		# Apply velocity to position
 		var next_position = position + velocity * time_step
-		# Create raycast from current to next position
+		
 		var ray_query = PhysicsRayQueryParameters2D.create(
 			position + global_position,
 			next_position + global_position
 		)
-		# Set collision mask to match ball's collision layers
 		ray_query.collision_mask = ball.collision_mask
 		ray_query.exclude = [ball.get_rid()]  # Don't collide with the ball itself
 		
 		var ray_result = space_state.intersect_ray(ray_query)
 		
-		if ray_result and bounce_encountered <= 1:
+		if ray_result:
 			# Collision detected - calculate bounce
 			var collision_point = ray_result.position - global_position
 			var collision_normal = ray_result.normal
@@ -841,25 +838,24 @@ func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
 			points.append(collision_point)
 			
 			bounce_encountered += 1
+			next_pt_bounce = true
 			
 			# Calculate bounce velocity using reflection formula
 			var dot_product = velocity.dot(collision_normal)
-			var reflected_velocity = velocity - 2 * dot_product * collision_normal
+			var reflected_velocity = velocity.bounce(collision_normal)
 			
-			# Apply bounce speed loss exactly like the ball does
-			#velocity = reflected_velocity.normalized() * reflected_velocity.length() * ball.bounce_speed_loss
+			velocity = reflected_velocity * ball.bounce_speed_loss
+			position = collision_point + collision_normal * 0.1
 			
-			velocity = velocity.normalized() * velocity.length() * ball.bounce_speed_loss
-			
-			# Update position to collision point and move slightly away from surface
-			position = collision_point + collision_normal * 2.0
-			
-			# Stop if velocity becomes too small
 			if velocity.length() < 50.0:
+				break
+				
+			if bounce_encountered > 1:
 				break
 		else:
 			# No collision, continue normal trajectory
 			position = next_position
+			next_pt_bounce = false
 		
 		# Stop if trajectory goes too far down
 		if position.y > 1000:
