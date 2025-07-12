@@ -62,10 +62,12 @@ class_name Player
 ## Speed of the ball when the player shoots
 @export var shoot_speed: float = 1200.0
 ## Length of the trajectory curve in SHOOTING state
-@export var trajectory_length: float = 50
+@export var trajectory_length: float = 80
 
 ## Input prefix for this player (e.g., "p1_" for player 1)
 var input_prefix: String = ""
+
+var shoot_direction: Vector2 = Vector2.ZERO
 
 # State machine - Defines the possible states of the player
 enum PlayerState {
@@ -279,6 +281,7 @@ func get_input() -> void:
 
 	# Update pass direction line
 	update_pass_direction_line(input_dir)
+	shoot_direction = input_dir
 
 # Apply gravity consistently based on vertical velocity
 func apply_gravity() -> void:
@@ -769,7 +772,9 @@ func update_pass_direction_line(input_dir: Vector2) -> void:
 				pass_direction * 50  # Line length
 			])
 		else:
-			_draw_trajectory_curve(pass_direction)
+			#_draw_trajectory_curve(shoot_direction)
+			_draw_trajectory_curve_raycast(shoot_direction)
+			# pass_direction_line.width = ball.ball_radius * 2
 	else:
 		pass_direction_line.visible = false
 
@@ -780,19 +785,86 @@ func _draw_trajectory_curve(direction: Vector2) -> void:
 
 	var points = PackedVector2Array()
 
-
 	var position = ball.position - global_position
 	var velocity = direction.normalized() * shoot_speed
 
 	for i in range(num_points):
 		points.append(position)
 
+		# Apply gravity to vertical velocity
+		velocity.y += gravity * time_step * ball.shoot_gravity_scale
 		# Apply velocity to position
 		position += velocity * time_step
 
-		# Apply gravity to vertical velocity
-		velocity.y += gravity * ball.shoot_gravity_scale * time_step
+	pass_direction_line.points = points
+	
+func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
+	print("Recorded direction from draw curve: ", direction)
+	var space_state = get_world_2d().direct_space_state
+	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+	var time_step := 0.1
+	var num_points := trajectory_length
 
+	var points = PackedVector2Array()
+
+	var position = ball.position - global_position
+	var velocity = direction * shoot_speed
+	
+	var bounce_encountered = 0
+	
+	var mass = ball.mass 
+	
+	for i in range(num_points):
+		points.append(position)
+
+		# Apply gravity to vertical velocity
+		velocity.y += gravity * time_step * ball.shoot_gravity_scale
+		# Apply velocity to position
+		var next_position = position + velocity * time_step
+		# Create raycast from current to next position
+		var ray_query = PhysicsRayQueryParameters2D.create(
+			position + global_position,
+			next_position + global_position
+		)
+		# Set collision mask to match ball's collision layers
+		ray_query.collision_mask = ball.collision_mask
+		ray_query.exclude = [ball.get_rid()]  # Don't collide with the ball itself
+		
+		var ray_result = space_state.intersect_ray(ray_query)
+		
+		if ray_result and bounce_encountered <= 1:
+			# Collision detected - calculate bounce
+			var collision_point = ray_result.position - global_position
+			var collision_normal = ray_result.normal
+			
+			# Add collision point to trajectory
+			points.append(collision_point)
+			
+			bounce_encountered += 1
+			
+			# Calculate bounce velocity using reflection formula
+			var dot_product = velocity.dot(collision_normal)
+			var reflected_velocity = velocity - 2 * dot_product * collision_normal
+			
+			# Apply bounce speed loss exactly like the ball does
+			#velocity = reflected_velocity.normalized() * reflected_velocity.length() * ball.bounce_speed_loss
+			
+			velocity = velocity.normalized() * velocity.length() * ball.bounce_speed_loss
+			
+			# Update position to collision point and move slightly away from surface
+			position = collision_point + collision_normal * 2.0
+			
+			# Stop if velocity becomes too small
+			if velocity.length() < 50.0:
+				break
+		else:
+			# No collision, continue normal trajectory
+			position = next_position
+		
+		# Stop if trajectory goes too far down
+		if position.y > 1000:
+			break
+		
 	pass_direction_line.points = points
 
 func player_near_hoop(param_hoop):
@@ -879,34 +951,34 @@ func shoot_ball(ball) -> void:
 		current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 		return
 
-	# Get the pass direction from input
-	var shot_direction = Vector2.ZERO
-	if input_prefix.is_empty():
-		shot_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	else: # Multiplayer
-		shot_direction = Input.get_vector(
-			input_prefix + "move_left",
-			input_prefix + "move_right",
-			input_prefix + "move_up",
-			input_prefix + "move_down"
-		)
+	## Get the pass direction from input
+	#var shot_direction = Vector2.ZERO
+	#if input_prefix.is_empty():
+		#shot_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	#else: # Multiplayer
+		#shot_direction = Input.get_vector(
+			#input_prefix + "move_left",
+			#input_prefix + "move_right",
+			#input_prefix + "move_up",
+			#input_prefix + "move_down"
+		#)
 
 	# If no input direction, use looking direction
-	if shot_direction.length() < 0.1:
-		shot_direction = looking_direction
+	if shoot_direction.length() < 0.1:
+		shoot_direction = looking_direction
 
-	# Normalize the direction
-	shot_direction = shot_direction.normalized()
+	## Normalize the direction
+	#shoot_direction = shoot_direction.normalized()
 
 	# Release the ball
 	has_ball = false
 	ball._handle_freeze(false, self)
 
 	ball.set_gravity_scale(ball.shoot_gravity_scale)
+	
+	print("Recorded direction from shoot ball: ", shoot_direction)
 
-	# Apply pass velocity to the ball - completely override any previous velocity
-	# This ensures the ball travels exactly in the intended direction without dipping
-	ball.linear_velocity = shot_direction * shoot_speed
+	ball.linear_velocity = shoot_direction * shoot_speed
 	current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
 
 	var shooting_point_factor = 1

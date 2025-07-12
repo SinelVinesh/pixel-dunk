@@ -62,9 +62,9 @@ multiplayer_manager.spawn_points.clear()
 
 # Add your spawn points
 for i in range(1, 5):
-    var spawn_point = get_node_or_null("YourSpawnPointsParent/SpawnPoint" + str(i))
-    if spawn_point:
-        multiplayer_manager.spawn_points.append(get_path_to(spawn_point))
+	var spawn_point = get_node_or_null("YourSpawnPointsParent/SpawnPoint" + str(i))
+	if spawn_point:
+		multiplayer_manager.spawn_points.append(get_path_to(spawn_point))
 
 # Set the player scene to use
 multiplayer_manager.player_scene = preload("res://entities/player/Player.tscn")
@@ -94,36 +94,36 @@ Sample ball passing implementation:
 ```gdscript
 # In your ball script or player script that handles passing
 func pass_ball(from_player):
-    # Get the MultiplayerManager
-    var multiplayer_manager = get_node("/root/MultiplayerManager")
-    var active_players = multiplayer_manager.active_players
+	# Get the MultiplayerManager
+	var multiplayer_manager = get_node("/root/MultiplayerManager")
+	var active_players = multiplayer_manager.active_players
 
-    # Find the nearest teammate
-    var nearest_teammate = null
-    var shortest_distance = INF
+	# Find the nearest teammate
+	var nearest_teammate = null
+	var shortest_distance = INF
 
-    for player in active_players:
-        # Skip the player who is passing
-        if player == from_player:
-            continue
+	for player in active_players:
+		# Skip the player who is passing
+		if player == from_player:
+			continue
 
-        # Only pass to teammates (same team_id)
-        if player.team_id == from_player.team_id:
-            var distance = player.global_position.distance_to(from_player.global_position)
+		# Only pass to teammates (same team_id)
+		if player.team_id == from_player.team_id:
+			var distance = player.global_position.distance_to(from_player.global_position)
 
-            # Check if in passing range
-            if distance < from_player.pass_range and distance < shortest_distance:
-                shortest_distance = distance
-                nearest_teammate = player
+			# Check if in passing range
+			if distance < from_player.pass_range and distance < shortest_distance:
+				shortest_distance = distance
+				nearest_teammate = player
 
-    # Pass the ball to the nearest teammate if found
-    if nearest_teammate:
-        # Implementation details depend on your ball attachment/passing system
-        detach_from_player(from_player)
-        apply_pass_force_to(nearest_teammate.global_position)
+	# Pass the ball to the nearest teammate if found
+	if nearest_teammate:
+		# Implementation details depend on your ball attachment/passing system
+		detach_from_player(from_player)
+		apply_pass_force_to(nearest_teammate.global_position)
 
-        # Emit a signal for scoring/UI updates
-        from_player.emit_signal("ball_passed", from_player, nearest_teammate.global_position, nearest_teammate)
+		# Emit a signal for scoring/UI updates
+		from_player.emit_signal("ball_passed", from_player, nearest_teammate.global_position, nearest_teammate)
 ```
 
 ## 6. Customizing Player Controls
