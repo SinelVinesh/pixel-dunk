@@ -1,11 +1,11 @@
 [gd_scene load_steps=11 format=3 uid="uid://xvexedkptltf"]
 
-[ext_resource type="Texture2D" uid="uid://ljxooi6fo6c1" path="res://assets/assets/ui/png/frame/Score_board.png" id="1_gftla"]
+[ext_resource type="Texture2D" uid="uid://ljxooi6fo6c1" path="res://assets/ui/png/frame/Score_board.png" id="1_gftla"]
 [ext_resource type="Script" uid="uid://bbuo2btkyx0va" path="res://ui/GameUI/ScoreBoard/score_board.gd" id="1_mtcdb"]
-[ext_resource type="Texture2D" uid="uid://5pkb0pws8n46" path="res://assets/assets/ui/png/Icons/Frog/1x/Icon_Frog_1.png" id="2_lflkl"]
-[ext_resource type="Texture2D" uid="uid://c2u3vo5n71i8w" path="res://assets/assets/ui/png/Icons/Rabbit/1x/Icon_Rabbit_1.png" id="3_yovpp"]
+[ext_resource type="Texture2D" uid="uid://5pkb0pws8n46" path="res://assets/ui/png/Icons/Frog/1x/Icon_Frog_1.png" id="2_lflkl"]
+[ext_resource type="Texture2D" uid="uid://c2u3vo5n71i8w" path="res://assets/ui/png/Icons/Rabbit/1x/Icon_Rabbit_1.png" id="3_yovpp"]
 [ext_resource type="LabelSettings" uid="uid://dyujgmeby0p56" path="res://ui/fonts/FrogFont.tres" id="4_ipatr"]
-[ext_resource type="FontFile" uid="uid://du27qnmxyk7a1" path="res://assets/assets/fonts/EnterCommand-Bold.ttf" id="4_yovpp"]
+[ext_resource type="FontFile" uid="uid://du27qnmxyk7a1" path="res://assets/fonts/EnterCommand-Bold.ttf" id="4_yovpp"]
 [ext_resource type="LabelSettings" uid="uid://c4f2yjbq8vd7a" path="res://ui/fonts/RabbitFont.tres" id="6_l4nc5"]
 [ext_resource type="LabelSettings" uid="uid://x8l42k6pclo0" path="res://ui/fonts/NumberFont.tres" id="7_l4nc5"]
 

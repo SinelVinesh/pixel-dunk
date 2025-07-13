@@ -1,6 +1,23 @@
 extends CharacterBody2D
 class_name Player
 
+class AnimationSettings :
+	var name: String
+	var file: String
+	var looping: bool
+	var speed: float
+
+	func _init(new_name: String, new_file: String, new_looping: bool, new_speed: float):
+		self.name = new_name
+		self.file = new_file
+		self.looping = new_looping
+		self.speed = new_speed
+
+# Character's metadata
+@export_group("Character Metadata")
+## PLayer's name, used to load the animated sprite
+@export var character_name: String = "Frog_01"
+
 # Player movement and physics properties
 @export_group("Movement")
 ## Base horizontal and vertical movement speed
@@ -80,6 +97,23 @@ enum PlayerState {
 	SHOOTING
 }
 var current_state: int = PlayerState.JUMPING  # Current state of the player
+
+# Animations
+enum PlayerAnimation {
+	IDLE,
+	AIM,
+	CARRY,
+	DASH,
+	JUMP,
+	DOUBLE_JUMP,
+	RUN,
+	SHOOT,
+	PASS,
+	LAND,
+	FALL
+}
+
+var animation_settings: Dictionary[PlayerAnimation, AnimationSettings] = {}
 
 # Player status variables
 var has_ball: bool = false         # Whether the player is holding the ball
@@ -206,6 +240,40 @@ func _physics_process(delta: float) -> void:
 	# Update some nodes transform to flip according to looking direction
 	_handle_transform_flip()
 
+func _build_animation_settings() -> void:
+	animation_settings = {
+		PlayerAnimation.IDLE: AnimationSettings.new("idle_%s" % character_name, "res://assets/Characters/%s/IDLE/idle.png" % character_name, true, 16),
+		PlayerAnimation.AIM: AnimationSettings.new("aim_%s" % character_name, "res://assets/Characters/%s/AIM/aim.png" % character_name, true, 16),
+		PlayerAnimation.CARRY: AnimationSettings.new("carry_%s" % character_name, "res://assets/Characters/%s/CARRY/dribble.png" % character_name, true, 16),
+		PlayerAnimation.DASH: AnimationSettings.new("dash_%s" % character_name, "res://assets/Characters/%s/DASH/dash.png" % character_name, false, 16),
+		PlayerAnimation.JUMP: AnimationSettings.new("jump_%s" % character_name, "res://assets/Characters/%s/JUMP/jump.png" % character_name, true, 16),
+		PlayerAnimation.DOUBLE_JUMP: AnimationSettings.new("double_jump_%s" % character_name, "res://assets/Characters/%s/JUMP DOUBLE/double_jump.png" % character_name, true, 24),
+		PlayerAnimation.RUN: AnimationSettings.new("run_%s" % character_name, "res://assets/Characters/%s/RUN/run.png" % character_name, true, 16),
+		PlayerAnimation.SHOOT: AnimationSettings.new("shoot_%s" % character_name, "res://assets/Characters/%s/SHOOT/shoot.png" % character_name, false, 32),
+		PlayerAnimation.PASS: AnimationSettings.new("pass_%s" % character_name, "res://assets/Characters/%s/PASS/pass.png" % character_name, false, 24),
+		PlayerAnimation.LAND: AnimationSettings.new("land_%s" % character_name, "res://assets/Characters/%s/LAND/land.png" % character_name, true, 16),
+		PlayerAnimation.FALL: AnimationSettings.new("fall_%s" % character_name, "res://assets/Characters/%s/FALL/fall.png" % character_name, true, 16),
+	}
+
+
+# Load the correct assets in the animated sprite component based on the Character's name
+func load_animated_sprite() -> void:
+	_build_animation_settings()
+	var sprite_frames = animated_sprite.sprite_frames
+	for animation in PlayerAnimation.values(): 
+		var settings = animation_settings[animation]
+		sprite_frames.add_animation(settings.name)
+		sprite_frames.set_animation_loop(settings.name, settings.looping)
+		sprite_frames.set_animation_speed(settings.name, settings.speed)
+		var animation_sheet = load(settings.file)
+		var frame_count = animation_sheet.get_width() / 32
+		for i in range(frame_count):
+			var atlas = AtlasTexture.new()
+			atlas.atlas = animation_sheet
+			atlas.region = Rect2(32 * i,0,32, 32)
+			sprite_frames.add_frame(settings.name, atlas)
+	return 
+
 # Update coyote time system
 func update_coyote_time(delta: float) -> void:
 	# Start coyote time when player just left the ground (and wasn't jumping)
@@ -288,7 +356,7 @@ func apply_gravity() -> void:
 	var gravity_modifier = 1.0
 
 	if velocity.y > 0:
-		animation_handler("fall")
+		animation_handler(PlayerAnimation.FALL)
 		# Falling - apply higher gravity
 		gravity_modifier = fall_gravity_multiplier
 	else:
@@ -313,14 +381,14 @@ func apply_gravity() -> void:
 func handle_free_movement(delta: float) -> void:
 	# Apply movement with acceleration if input is detected
 	if move_direction.length() > 0.1:
-		animation_handler("run")
+		animation_handler(PlayerAnimation.RUN)
 		# For horizontal movement
 		velocity.x = lerp(velocity.x, move_direction.x * move_speed, acceleration * delta)
 
 		# Remove ability to control vertical movement in the air
 		# This prevents "flying" in FREE state
 	else:
-		animation_handler("idle")
+		animation_handler(PlayerAnimation.IDLE)
 		# Apply friction when not moving to slow down
 		velocity.x = velocity.x * friction
 		if !on_ground:
@@ -347,7 +415,7 @@ func handle_free_movement(delta: float) -> void:
 
 # Perform a jump (shared logic for regular and coyote jumps)
 func perform_jump() -> void:
-	animation_handler("jump")
+	animation_handler(PlayerAnimation.JUMP)
 	velocity.y = -jump_force
 	jump_sound.play()
 	current_state = PlayerState.JUMPING
@@ -357,7 +425,7 @@ func perform_jump() -> void:
 
 # Perform a double jump
 func _perform_double_jump() -> void:
-	animation_handler("double_jump")
+	animation_handler(PlayerAnimation.DOUBLE_JUMP)
 	velocity.y = -jump_force * double_jump_force_multiplier  # Use configurable multiplier
 	jump_sound.play()
 	current_state = PlayerState.DOUBLE_JUMPING
@@ -368,7 +436,7 @@ func handle_ball_possession(delta: float) -> void:
 	# Movement is restricted to dashing only when having the ball
 	# Only apply friction when not in a dash or immediately after a dash
 	if not in_dash and (dash_timer <= 0 or not preserve_dash_momentum_with_ball):
-		animation_handler("carry")
+		animation_handler(PlayerAnimation.CARRY)
 		velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
 
 	# Only apply vertical friction when in the air
@@ -506,7 +574,7 @@ func handle_double_jump(delta: float) -> void:
 
 # Start a dash - used by multiple states
 func start_dash() -> void:
-	animation_handler("dash")
+	animation_handler(PlayerAnimation.DASH)
 	# For dashing, we want to use the raw input direction to allow diagonal dashes,
 	# if multiplayer, we have a prefix like "p1_"
 	var dash_input: Vector2
@@ -599,7 +667,7 @@ func pass_ball(ball) -> void:
 
 	# Get the pass direction from input
 	var pass_direction = Vector2.ZERO
-	animation_handler("pass",true)
+	animation_handler(PlayerAnimation.PASS,true)
 	if input_prefix.is_empty():
 		pass_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	else: # Multiplayer
@@ -941,7 +1009,7 @@ func _perform_dunk() -> void:
 	)
 
 func shoot_ball(ball) -> void:
-	animation_handler("shoot",true)
+	animation_handler(PlayerAnimation.SHOOT,true)
 	# Do nothing if has no ball
 	if not has_ball or not ball:
 		current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
@@ -988,22 +1056,24 @@ func shoot_ball(ball) -> void:
 
 
 func handle_shooting(delta: float) -> void:
-	animation_handler("aim")
+	animation_handler(PlayerAnimation.AIM)
 	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
 	apply_gravity()
 	if shoot_released:
 		shoot_ball(ball)
 
-func animation_handler(animation_name: String, wait_for_animation: bool = false) -> void:
-	var complete_animation_name = animation_name + "_" + "%d" % ((team_id + 1) % 2)
+func animation_handler(animation: PlayerAnimation, wait_for_animation: bool = false) -> void:
+	var settings = animation_settings[animation]
 	if animated_sprite.is_playing() and animated_sprite.animation == animation_to_wait_for :
 		return
 	else :
 		animation_to_wait_for = ""
-	if animated_sprite.animation != complete_animation_name :
-		animated_sprite.play(complete_animation_name)
+	if animated_sprite.animation != settings.name :
+		animated_sprite.play(settings.name)
+		print("[ANIMATION] Playing animation: ", settings.name)
+		print("[ANIMATION] Number of frames: ", animated_sprite.sprite_frames.get_frame_count(settings.name))
 		if wait_for_animation:
-			animation_to_wait_for = complete_animation_name
+			animation_to_wait_for = settings.name
 
 func assign_hoop() -> void:
 	# Get HoopF if Team.FROG, HoopR if Team.RABBIT
