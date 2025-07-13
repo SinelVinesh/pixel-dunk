@@ -1,6 +1,6 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://c4f2yjbq8vd7a"]
 
-[ext_resource type="FontFile" uid="uid://du27qnmxyk7a1" path="res://assets/assets/fonts/EnterCommand-Bold.ttf" id="1_0sjml"]
+[ext_resource type="FontFile" uid="uid://du27qnmxyk7a1" path="res://assets/fonts/EnterCommand-Bold.ttf" id="1_0sjml"]
 
 [resource]
 font = ExtResource("1_0sjml")

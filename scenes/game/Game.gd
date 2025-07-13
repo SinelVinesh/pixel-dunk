@@ -89,18 +89,26 @@ func _start_game():
 		multiplayer_manager.active_players[0].team_id = 0  # Blue team
 		multiplayer_manager.active_players[0]._update_visual_indicators()
 		multiplayer_manager.active_players[0].assign_hoop()
+		multiplayer_manager.active_players[0].character_name = "Rabbit_01"
+		multiplayer_manager.active_players[0].load_animated_sprite()
 	if multiplayer_manager.active_players.size() > 1:
 		multiplayer_manager.active_players[1].team_id = 1  # Red team
 		multiplayer_manager.active_players[1]._update_visual_indicators()
 		multiplayer_manager.active_players[1].assign_hoop()
+		multiplayer_manager.active_players[1].character_name = "Frog_01"
+		multiplayer_manager.active_players[1].load_animated_sprite()
 	if multiplayer_manager.active_players.size() > 2:
 		multiplayer_manager.active_players[2].team_id = 0  # Blue team
 		multiplayer_manager.active_players[2]._update_visual_indicators()
 		multiplayer_manager.active_players[2].assign_hoop()
+		multiplayer_manager.active_players[2].character_name = "Rabbit_02"
+		multiplayer_manager.active_players[2].load_animated_sprite()
 	if multiplayer_manager.active_players.size() > 3:
 		multiplayer_manager.active_players[3].team_id = 1  # Red team
 		multiplayer_manager.active_players[3]._update_visual_indicators()
 		multiplayer_manager.active_players[3].assign_hoop()
+		multiplayer_manager.active_players[3].character_name = "Frog_02"
+		multiplayer_manager.active_players[3].load_animated_sprite()
 
 
 	# Create dash indicators for all players

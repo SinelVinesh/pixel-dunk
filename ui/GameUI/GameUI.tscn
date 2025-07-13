@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://d67aigljkxqu"]
 
 [ext_resource type="PackedScene" uid="uid://c0rb8b0qli0d8" path="res://ui/GameUI/PlayerInfo/PlayerInfo.tscn" id="2_vcgi3"]
-[ext_resource type="Texture2D" uid="uid://c2yqsv8vbosth" path="res://assets/assets/ui/png/Card/Character_Card_Rabbit.png" id="3_0ol27"]
+[ext_resource type="Texture2D" uid="uid://c2yqsv8vbosth" path="res://assets/ui/png/Card/Character_Card_Rabbit.png" id="3_0ol27"]
 
 [node name="GameUi" type="Control"]
 layout_mode = 3

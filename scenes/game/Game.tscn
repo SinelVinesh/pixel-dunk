@@ -3,13 +3,13 @@
 [ext_resource type="Script" uid="uid://b7eln5k22n1lt" path="res://scenes/game/Game.gd" id="1_m44fu"]
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="2_7qcb4"]
 [ext_resource type="PackedScene" uid="uid://bee54h56naa7b" path="res://entities/ball/Ball.tscn" id="2_vrspl"]
-[ext_resource type="Texture2D" uid="uid://cnrp7xyqu64oj" path="res://assets/assets/Background/background.png" id="3_lyhax"]
+[ext_resource type="Texture2D" uid="uid://cnrp7xyqu64oj" path="res://assets/Background/background.png" id="3_lyhax"]
 [ext_resource type="PackedScene" uid="uid://d67aigljkxqu" path="res://ui/GameUI/GameUI.tscn" id="4_7qcb4"]
-[ext_resource type="Texture2D" uid="uid://berma4odn6pmd" path="res://assets/assets/Objects/platforms/Horizontal_002.png" id="4_gg4pt"]
+[ext_resource type="Texture2D" uid="uid://berma4odn6pmd" path="res://assets/Objects/platforms/Horizontal_002.png" id="4_gg4pt"]
 [ext_resource type="PackedScene" uid="uid://xvexedkptltf" path="res://ui/GameUI/ScoreBoard/ScoreBoard.tscn" id="5_qf6a8"]
-[ext_resource type="Texture2D" uid="uid://b6pprbakc2y5p" path="res://assets/assets/Objects/platforms/Center_002.png" id="5_wnrko"]
+[ext_resource type="Texture2D" uid="uid://b6pprbakc2y5p" path="res://assets/Objects/platforms/Center_002.png" id="5_wnrko"]
 [ext_resource type="PackedScene" uid="uid://d3ian3udfvyec" path="res://entities/hoop/Hoop.tscn" id="6_365ku"]
-[ext_resource type="AudioStream" uid="uid://dd1ksjvc3jebk" path="res://assets/assets/audio/mixkit-basketball-buzzer-1647.wav" id="10_56wml"]
+[ext_resource type="AudioStream" uid="uid://dd1ksjvc3jebk" path="res://assets/audio/mixkit-basketball-buzzer-1647.wav" id="10_56wml"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(941.638, 59.8007)

@@ -141,7 +141,7 @@ script = ExtResource("1_hqtht")
 position = Vector2(0, -9)
 scale = Vector2(2.5, 2.5)
 sprite_frames = ExtResource("2_g3lhm")
-animation = &"aim_0"
+animation = &""
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 visible = false
