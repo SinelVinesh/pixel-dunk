@@ -11,6 +11,12 @@ func _on_game_timer_timeout() -> void:
 
 func get_time_left() -> float:
 	return $GameTimer.time_left
+
+func pause_timer() -> void:
+	$GameTimer.paused = true
+
+func resume_timer() -> void:
+	$GameTimer.paused = false
 	
 func emit_game_ended():
 	print("game ended")

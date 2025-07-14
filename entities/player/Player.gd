@@ -1,7 +1,7 @@
 extends CharacterBody2D
 class_name Player
 
-class AnimationSettings :
+class AnimationSettings:
 	var name: String
 	var file: String
 	var looping: bool
@@ -17,6 +17,9 @@ class AnimationSettings :
 @export_group("Character Metadata")
 ## PLayer's name, used to load the animated sprite
 @export var character_name: String = "Frog_01"
+
+# Global game state - controls if players can move
+var game_frozen: bool = false
 
 # Player movement and physics properties
 @export_group("Movement")
@@ -88,15 +91,15 @@ var shoot_direction: Vector2 = Vector2.ZERO
 
 # State machine - Defines the possible states of the player
 enum PlayerState {
-	FREE,            # Normal movement without the ball
+	FREE, # Normal movement without the ball
 	BALL_POSSESSION, # Holding the ball (restricted movement)
-	DASHING,         # Currently performing a dash
-	JUMPING,         # In the air after jumping (first jump)
-	DOUBLE_JUMPING,   # In the air after a second jump
+	DASHING, # Currently performing a dash
+	JUMPING, # In the air after jumping (first jump)
+	DOUBLE_JUMPING, # In the air after a second jump
 	DUNKING,
 	SHOOTING
 }
-var current_state: int = PlayerState.JUMPING  # Current state of the player
+var current_state: int = PlayerState.JUMPING # Current state of the player
 
 # Animations
 enum PlayerAnimation {
@@ -116,33 +119,33 @@ enum PlayerAnimation {
 var animation_settings: Dictionary[PlayerAnimation, AnimationSettings] = {}
 
 # Player status variables
-var has_ball: bool = false         # Whether the player is holding the ball
-var on_ground: bool = false        # Whether the player is touching the ground
-var was_on_ground: bool = false    # Track previous ground state for detecting when player starts falling
-var dash_count: int = 0            # Current number of dashes available
-var can_double_jump: bool = false  # Whether the player can perform a double jump
-var in_dash: bool = false          # Whether the player is currently dashing
-var dash_direction: Vector2 = Vector2.ZERO  # Direction of the current dash
-var dash_timer: float = 0.0        # Time remaining in the current dash
-var coyote_timer: float = 0.0      # Timer for coyote time (jumping after falling)
-var can_coyote_jump: bool = false  # Whether player can use coyote jump
+var has_ball: bool = false # Whether the player is holding the ball
+var on_ground: bool = false # Whether the player is touching the ground
+var was_on_ground: bool = false # Track previous ground state for detecting when player starts falling
+var dash_count: int = 0 # Current number of dashes available
+var can_double_jump: bool = false # Whether the player can perform a double jump
+var in_dash: bool = false # Whether the player is currently dashing
+var dash_direction: Vector2 = Vector2.ZERO # Direction of the current dash
+var dash_timer: float = 0.0 # Time remaining in the current dash
+var coyote_timer: float = 0.0 # Timer for coyote time (jumping after falling)
+var can_coyote_jump: bool = false # Whether player can use coyote jump
 var preserve_dash_momentum_with_ball: bool = false # It's to prevent the player from flying when the dashing diagonally or upwards, change the method if you find a better solution - Abdoul
 # Node references - Links to child nodes in the scene
-@onready var sprite: Sprite2D = $Sprite2D  # Player's visual sprite
-@onready var ground_check: RayCast2D = $GroundCheck  # Ray for detecting ground
-@onready var dash_particles: GPUParticles2D = $DashParticles  # Particle effect for dashing
-@onready var ball_position: Marker2D = $Node_Flipper/BallPosition  # Position where ball appears when held
-@onready var dash_cooldown_timer: Timer = $DashCooldownTimer  # Timer for recharging dashes
-@onready var animation_player: AnimationPlayer = $AnimationPlayer  # Controls animations
-@onready var node_flipper : Node2D = $Node_Flipper # Used to flip its child nodes
+@onready var sprite: Sprite2D = $Sprite2D # Player's visual sprite
+@onready var ground_check: RayCast2D = $GroundCheck # Ray for detecting ground
+@onready var dash_particles: GPUParticles2D = $DashParticles # Particle effect for dashing
+@onready var ball_position: Marker2D = $Node_Flipper/BallPosition # Position where ball appears when held
+@onready var dash_cooldown_timer: Timer = $DashCooldownTimer # Timer for recharging dashes
+@onready var animation_player: AnimationPlayer = $AnimationPlayer # Controls animations
+@onready var node_flipper: Node2D = $Node_Flipper # Used to flip its child nodes
 @onready var pass_direction_line: Line2D = $PassDirectionLine # Line showing pass direction
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D # Used to flip the player sprite
 
 
 # Sound effect nodes
-@onready var jump_sound: AudioStreamPlayer = $JumpSound  # Sound when jumping
-@onready var dash_sound: AudioStreamPlayer = $DashSound  # Sound when dashing
-@onready var pass_sound: AudioStreamPlayer = $PassSound  # Sound when passing
+@onready var jump_sound: AudioStreamPlayer = $JumpSound # Sound when jumping
+@onready var dash_sound: AudioStreamPlayer = $DashSound # Sound when dashing
+@onready var pass_sound: AudioStreamPlayer = $PassSound # Sound when passing
 
 # Hoop
 @onready var hoop_r: Node2D = $"../HoopR"
@@ -152,11 +155,11 @@ var near_hoop: bool = false
 var current_hoop: Node2D = null
 
 # Input state variables
-var move_direction: Vector2 = Vector2.ZERO  # Direction player is trying to move
-var looking_direction: Vector2 = Vector2.RIGHT  # Direction player is facing
-var dash_pressed: bool = false  # Whether dash button was just pressed
-var jump_pressed: bool = false  # Whether jump button was just pressed
-var pass_pressed: bool = false  # Whether pass button was just pressed
+var move_direction: Vector2 = Vector2.ZERO # Direction player is trying to move
+var looking_direction: Vector2 = Vector2.RIGHT # Direction player is facing
+var dash_pressed: bool = false # Whether dash button was just pressed
+var jump_pressed: bool = false # Whether jump button was just pressed
+var pass_pressed: bool = false # Whether pass button was just pressed
 var shoot_pressed: bool = false
 var shoot_released: bool = false
 
@@ -167,8 +170,8 @@ var ball
 var animation_to_wait_for: String = ""
 
 # Signals - Events that other nodes can connect to
-signal dash_used(player)  # Emitted when a dash is used
-signal dash_recharged(player)  # Emitted when a dash is recharged
+signal dash_used(player) # Emitted when a dash is used
+signal dash_recharged(player) # Emitted when a dash is recharged
 
 
 # Called when the node enters the scene tree for the first time
@@ -260,7 +263,7 @@ func _build_animation_settings() -> void:
 func load_animated_sprite() -> void:
 	_build_animation_settings()
 	var sprite_frames = animated_sprite.sprite_frames
-	for animation in PlayerAnimation.values(): 
+	for animation in PlayerAnimation.values():
 		var settings = animation_settings[animation]
 		sprite_frames.add_animation(settings.name)
 		sprite_frames.set_animation_loop(settings.name, settings.looping)
@@ -270,9 +273,9 @@ func load_animated_sprite() -> void:
 		for i in range(frame_count):
 			var atlas = AtlasTexture.new()
 			atlas.atlas = animation_sheet
-			atlas.region = Rect2(32 * i,0,32, 32)
+			atlas.region = Rect2(32 * i, 0, 32, 32)
 			sprite_frames.add_frame(settings.name, atlas)
-	return 
+	return
 
 # Update coyote time system
 func update_coyote_time(delta: float) -> void:
@@ -283,7 +286,7 @@ func update_coyote_time(delta: float) -> void:
 
 		# Transition to JUMPING state after the coyote time window
 		# This ensures proper gravity is applied during falls
-		if velocity.y >= 0:  # Only if falling (not jumping upward)
+		if velocity.y >= 0: # Only if falling (not jumping upward)
 			# We'll use a delayed state change - after coyote time expires
 			# State will be changed in the timer check below
 			pass
@@ -302,6 +305,16 @@ func update_coyote_time(delta: float) -> void:
 
 # Process input and update input state variables
 func get_input() -> void:
+	# If game is frozen, ignore all input
+	if game_frozen:
+		move_direction = Vector2.ZERO
+		jump_pressed = false
+		dash_pressed = false
+		pass_pressed = false
+		shoot_pressed = false
+		shoot_released = false
+		return
+	
 	# Get directional input (WASD or arrow keys)
 	# Store full directional input for dashing purposes
 	var input_dir = Vector2.ZERO
@@ -407,7 +420,7 @@ func handle_free_movement(delta: float) -> void:
 		elif can_coyote_jump:
 			# Coyote jump - still can jump shortly after leaving ground
 			perform_jump()
-			can_coyote_jump = false  # Use up coyote jump
+			can_coyote_jump = false # Use up coyote jump
 
 	# Handle dashing if player has dash charges available
 	if dash_pressed and dash_count > 0:
@@ -416,17 +429,17 @@ func handle_free_movement(delta: float) -> void:
 # Perform a jump (shared logic for regular and coyote jumps)
 func perform_jump() -> void:
 	animation_handler(PlayerAnimation.JUMP)
-	velocity.y = -jump_force
+	velocity.y = - jump_force
 	jump_sound.play()
 	current_state = PlayerState.JUMPING
 
 	can_double_jump = double_jump_enabled
-	can_coyote_jump = false  # Use up coyote jump
+	can_coyote_jump = false # Use up coyote jump
 
 # Perform a double jump
 func _perform_double_jump() -> void:
 	animation_handler(PlayerAnimation.DOUBLE_JUMP)
-	velocity.y = -jump_force * double_jump_force_multiplier  # Use configurable multiplier
+	velocity.y = - jump_force * double_jump_force_multiplier # Use configurable multiplier
 	jump_sound.play()
 	current_state = PlayerState.DOUBLE_JUMPING
 	can_double_jump = false
@@ -437,7 +450,7 @@ func handle_ball_possession(delta: float) -> void:
 	# Only apply friction when not in a dash or immediately after a dash
 	if not in_dash and (dash_timer <= 0 or not preserve_dash_momentum_with_ball):
 		animation_handler(PlayerAnimation.CARRY)
-		velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
+		velocity.x = velocity.x * 0.8 # Apply strong friction to slow down the player
 
 	# Only apply vertical friction when in the air
 	if !on_ground:
@@ -531,7 +544,7 @@ func handle_jump(delta: float) -> void:
 
 	# Transition back to free state when landing
 	if on_ground:
-		if  not has_ball:
+		if not has_ball:
 			current_state = PlayerState.FREE
 		else:
 			current_state = PlayerState.BALL_POSSESSION
@@ -560,7 +573,7 @@ func handle_double_jump(delta: float) -> void:
 
 	# Transition back to free state when landing
 	if on_ground:
-		if  not has_ball:
+		if not has_ball:
 			current_state = PlayerState.FREE
 		else:
 			current_state = PlayerState.BALL_POSSESSION
@@ -593,10 +606,10 @@ func start_dash() -> void:
 	dash_direction = dash_input if dash_input.length() > 0.1 else looking_direction
 
 	# Apply dash effects
-	dash_count -= 1  # Use up one dash charge
-	dash_timer = dash_duration  # Set the dash duration timer
-	in_dash = true  # Flag as currently dashing
-	current_state = PlayerState.DASHING  # Change to dashing state
+	dash_count -= 1 # Use up one dash charge
+	dash_timer = dash_duration # Set the dash duration timer
+	in_dash = true # Flag as currently dashing
+	current_state = PlayerState.DASHING # Change to dashing state
 
 	# Reset and start the dash cooldown timer
 	if dash_count == max_dash_count - 1 or reset_timer_after_dash:
@@ -607,9 +620,9 @@ func start_dash() -> void:
 		dash_cooldown_timer.start()
 
 	# Visual and audio feedback
-	dash_particles.emitting = true  # Start particle effect
-	dash_sound.play()  # Play sound effect
-	animation_player.play("dash_squash_stretch")  # Play animation
+	dash_particles.emitting = true # Start particle effect
+	dash_sound.play() # Play sound effect
+	animation_player.play("dash_squash_stretch") # Play animation
 
 	# Trigger signal for UI/game systems
 	emit_signal("dash_used", self)
@@ -633,7 +646,7 @@ func pick_up_ball(ball) -> void:
 
 	# Check if we actually got the ball (steal might have been rejected)
 	if ball.ball_handler != self:
-		return  # Steal was rejected, don't update player state
+		return # Steal was rejected, don't update player state
 
 	#Set has ball
 	has_ball = true
@@ -667,7 +680,7 @@ func pass_ball(ball) -> void:
 
 	# Get the pass direction from input
 	var pass_direction = Vector2.ZERO
-	animation_handler(PlayerAnimation.PASS,true)
+	animation_handler(PlayerAnimation.PASS, true)
 	if input_prefix.is_empty():
 		pass_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	else: # Multiplayer
@@ -687,7 +700,7 @@ func pass_ball(ball) -> void:
 
 	# Release the ball
 	var shooting_point_factor = 1
-	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x)/2:
+	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x) / 2:
 		shooting_point_factor = 2
 	ball.set_shooting_team(team_id, shooting_point_factor)
 	has_ball = false
@@ -776,7 +789,7 @@ func _on_dash_cooldown_timer_timeout() -> void:
 
 	# Continue timer if not at max dashes
 	if dash_count < max_dash_count:
-		dash_cooldown_timer.start()  # Continue recharging
+		dash_cooldown_timer.start() # Continue recharging
 
 # Called when an area 2d enters check ball area 2d
 func _on_check_ball_a_2d_area_entered(area: Area2D) -> void:
@@ -837,7 +850,7 @@ func update_pass_direction_line(input_dir: Vector2) -> void:
 		if current_state != PlayerState.SHOOTING:
 			pass_direction_line.points = PackedVector2Array([
 				Vector2.ZERO,
-				pass_direction * 50  # Line length
+				pass_direction * 50 # Line length
 			])
 		else:
 			_draw_trajectory_curve_raycast(shoot_direction)
@@ -878,7 +891,7 @@ func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
 	
 	var bounce_encountered = 0
 	
-	var mass = ball.mass 
+	var mass = ball.mass
 	
 	var next_pt_bounce = false
 	
@@ -893,7 +906,7 @@ func _draw_trajectory_curve_raycast(direction: Vector2) -> void:
 			next_position + global_position
 		)
 		ray_query.collision_mask = ball.collision_mask
-		ray_query.exclude = [ball.get_rid()]  # Don't collide with the ball itself
+		ray_query.exclude = [ball.get_rid()] # Don't collide with the ball itself
 		
 		var ray_result = space_state.intersect_ray(ray_query)
 		
@@ -987,7 +1000,7 @@ func _perform_dunk() -> void:
 			var arc_offset = arc_height * (1.0 - (2.0 * t - 1.0) * (2.0 * t - 1.0))
 			new_pos.y -= arc_offset
 			global_position = new_pos
-	,0.0, 1.0, tween_duration)
+	, 0.0, 1.0, tween_duration)
 
 	player_tween.tween_callback(func():
 		ball.get_node('Area2D').set_monitoring(false)
@@ -1009,7 +1022,7 @@ func _perform_dunk() -> void:
 	)
 
 func shoot_ball(ball) -> void:
-	animation_handler(PlayerAnimation.SHOOT,true)
+	animation_handler(PlayerAnimation.SHOOT, true)
 	# Do nothing if has no ball
 	if not has_ball or not ball:
 		current_state = PlayerState.JUMPING if not on_ground else PlayerState.FREE
@@ -1050,25 +1063,25 @@ func shoot_ball(ball) -> void:
 	print("Distance from hoop: ", abs(position.x - hoop.position.x))
 	print("Distance from hoop_f: ", abs(position.x - hoop_f.position.x))
 	print("Distance from hoop_r: ", abs(position.x - hoop_r.position.x))
-	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x)/2:
+	if abs(position.x - hoop.position.x) > abs(hoop_f.position.x - hoop.position.x) / 2:
 		shooting_point_factor = 2
 	ball.set_shooting_team(team_id, shooting_point_factor)
 
 
 func handle_shooting(delta: float) -> void:
 	animation_handler(PlayerAnimation.AIM)
-	velocity.x = velocity.x * 0.8  # Apply strong friction to slow down the player
+	velocity.x = velocity.x * 0.8 # Apply strong friction to slow down the player
 	apply_gravity()
 	if shoot_released:
 		shoot_ball(ball)
 
 func animation_handler(animation: PlayerAnimation, wait_for_animation: bool = false) -> void:
 	var settings = animation_settings[animation]
-	if animated_sprite.is_playing() and animated_sprite.animation == animation_to_wait_for :
+	if animated_sprite.is_playing() and animated_sprite.animation == animation_to_wait_for:
 		return
-	else :
+	else:
 		animation_to_wait_for = ""
-	if animated_sprite.animation != settings.name :
+	if animated_sprite.animation != settings.name:
 		animated_sprite.play(settings.name)
 		print("[ANIMATION] Playing animation: ", settings.name)
 		print("[ANIMATION] Number of frames: ", animated_sprite.sprite_frames.get_frame_count(settings.name))

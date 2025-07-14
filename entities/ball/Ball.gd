@@ -3,24 +3,24 @@ class_name Ball
 
 # Ball properties
 @export_group("Properties")
-@export var bounce_speed_loss: float = 0.95 #Speed loss value per bounce
+@export var bounce_speed_loss: float = 0.95 # Speed loss value per bounce
 @export var steal_cooldown_duration: float = 1.0 # Duration in seconds the previous handler cannot pickup the ball
 
 # Ball effects
 @export_group("Effects")
-@export var bounce_fx : PackedScene #Particle to use for bounce impact effect
-@export var steal_sound : AudioStream #Sound to play when ball is stolen
+@export var bounce_fx: PackedScene # Particle to use for bounce impact effect
+@export var steal_sound: AudioStream # Sound to play when ball is stolen
 
-@onready var ball_rotation: float = rotation #Store ball default rotation
-@onready var ball_radius: float = $CollisionShape2D.shape.radius #Store ball radius
-@onready var bounce_sound = $BounceSound #Store bounce sfx node
+@onready var ball_rotation: float = rotation # Store ball default rotation
+@onready var ball_radius: float = $CollisionShape2D.shape.radius # Store ball radius
+@onready var bounce_sound = $BounceSound # Store bounce sfx node
 @onready var default_gravity_scale = get_gravity_scale() # Store default gravity scale
-@onready var ball_area : Area2D = $Area2D # Store ball area 2D node
+@onready var ball_area: Area2D = $Area2D # Store ball area 2D node
 @onready var steal_cooldown_timer: Timer = $StealCooldownTimer # Timer for cooldown after ball is stolen
 @onready var steal_sound_player: AudioStreamPlayer = $StealSound # Sound player for steal effect
 
-var last_state: PhysicsDirectBodyState2D #State that contains contact collision infos
-var min_velocity : float # Minimum velocity to apply bounce vfx / sfx
+var last_state: PhysicsDirectBodyState2D # State that contains contact collision infos
+var min_velocity: float # Minimum velocity to apply bounce vfx / sfx
 var ball_handler # Node for the player currently holding the ball
 var previous_handler # Node for the player that previously held the ball
 var previous_passer # Node for the player who last passed the ball
@@ -46,7 +46,7 @@ func _ready() -> void:
 
 	steal_cooldown_timer.timeout.connect(_on_steal_cooldown_timeout)
 
-	$"/root/ScoreManager".connect("scored_by_team",_on_scored_by_team)
+	$"/root/ScoreManager".connect("scored_by_team", _on_scored_by_team)
 
 	#Initially launch ball to the right
 	#linear_velocity = Vector2(300, -0) #For test
@@ -61,29 +61,29 @@ func _on_body_entered(body: Node) -> void:
 	linear_velocity = linear_velocity.normalized() * linear_velocity.length() * bounce_speed_loss
 
 	#Reduces volume according to max current linear velocity (x or y)
-	bounce_sound.volume_db = linear_to_db((((max(abs(linear_velocity.x), abs(linear_velocity.y))) - min_velocity) / 450) * 2) #Normalize current highest linear velocity between x or y into 0 - 2
+	bounce_sound.volume_db = linear_to_db((((max(abs(linear_velocity.x), abs(linear_velocity.y))) - min_velocity) / 450) * 2) # Normalize current highest linear velocity between x or y into 0 - 2
 
 	#Play bounce sfx
 	bounce_sound.play()
 
 	#Spawn bounce vfx to contact location
 	if abs(linear_velocity.x) > (min_velocity * 5) or abs(linear_velocity.y) > (min_velocity * 5):
-		for i in range(last_state.get_contact_count()): #Get state infos for each contact
-			var contact_position = last_state.get_contact_local_position(i) #Store contacte location
-			var bounce_fx_to_spawn = bounce_fx.instantiate() #Instantiate bounce particle vfx
-			add_child(bounce_fx_to_spawn) #Explicit content (not what you think)
-			bounce_fx_to_spawn.global_position = contact_position #Set bounce particle vfx location
-			bounce_fx_to_spawn._spawn_particle() #Call the function to emit particles
+		for i in range(last_state.get_contact_count()): # Get state infos for each contact
+			var contact_position = last_state.get_contact_local_position(i) # Store contacte location
+			var bounce_fx_to_spawn = bounce_fx.instantiate() # Instantiate bounce particle vfx
+			add_child(bounce_fx_to_spawn) # Explicit content (not what you think)
+			bounce_fx_to_spawn.global_position = contact_position # Set bounce particle vfx location
+			bounce_fx_to_spawn._spawn_particle() # Call the function to emit particles
 			#print(str(bounce_fx_to_spawn.global_position)) #For debug
 
 #Called each physic simulation
 func _integrate_forces(state):
-	last_state = state #Store state in last state
+	last_state = state # Store state in last state
 
 # Handle activate / deactivate ball collision and gravity when picked up / passed
 # Condition: true = freeze ball for pickup, false = unfreeze ball for pass
 # Handler: player who has ball
-func _handle_freeze(condition : bool, handler):
+func _handle_freeze(condition: bool, handler):
 	if condition:
 		set_contact_monitor(false) # Disable contact monitor
 
@@ -149,7 +149,7 @@ func handle_ball_steal(new_handler):
 	if previous_handler != null:
 		# Check if the current handler is dashing or if they're on the same team - if so, ignore steal attempt
 		if previous_handler.current_state == previous_handler.PlayerState.DASHING or previous_handler.team_id == new_handler.team_id:
-			return  # Abort steal, ball handler keeps the ball
+			return # Abort steal, ball handler keeps the ball
 
 		# Add previous handler to ignore list
 		handlers_to_ignore.append(previous_handler)
@@ -198,7 +198,7 @@ func show_steal_effect():
 func can_pickup(player) -> bool:
 	var result = not handlers_to_ignore.has(player) and team_to_ignore != player.team_id
 	# If the ball is picked up by the other team, allow the scoring team to pick it again
-	if result :
+	if result:
 		team_to_ignore = -1
 	return result
 
