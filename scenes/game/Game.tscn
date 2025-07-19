@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://03bo43seuy2d"]
+[gd_scene load_steps=15 format=3 uid="uid://03bo43seuy2d"]
 
 [ext_resource type="Script" uid="uid://b7eln5k22n1lt" path="res://scenes/game/Game.gd" id="1_m44fu"]
 [ext_resource type="PackedScene" uid="uid://brkjmox0e57rp" path="res://entities/player/Player.tscn" id="2_7qcb4"]
@@ -14,11 +14,8 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rj6kv"]
 size = Vector2(941.638, 59.8007)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_aptqa"]
-size = Vector2(730, 36)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gynul"]
-size = Vector2(740, 36)
+size = Vector2(835, 38)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qf6a8"]
 size = Vector2(52, 187)
@@ -116,35 +113,41 @@ position = Vector2(37.5, 2.74087)
 scale = Vector2(0.025, 1)
 shape = SubResource("RectangleShape2D_rj6kv")
 
-[node name="Platform1" type="StaticBody2D" parent="."]
-z_index = 1
-position = Vector2(253, 482)
-collision_layer = 9
-collision_mask = 0
-
-[node name="ColorRect" type="ColorRect" parent="Platform1"]
-offset_left = -75.0
-offset_top = -10.0
-offset_right = 75.0
-offset_bottom = 10.0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
-scale = Vector2(0.2, 0.5)
-shape = SubResource("RectangleShape2D_aptqa")
-
 [node name="Platform2" type="StaticBody2D" parent="."]
 z_index = 1
 position = Vector2(1003, 482)
 collision_layer = 9
 collision_mask = 0
 
-[node name="ColorRect" type="ColorRect" parent="Platform2"]
-offset_left = -75.0
-offset_top = -10.0
-offset_right = 75.0
-offset_bottom = 10.0
+[node name="TextureRect" type="TextureRect" parent="Platform2"]
+offset_left = -98.0
+offset_top = -43.0
+offset_right = 112.0
+offset_bottom = 36.0
+texture = ExtResource("4_gg4pt")
+stretch_mode = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
+position = Vector2(4.5, -0.5)
+scale = Vector2(0.2, 0.5)
+shape = SubResource("RectangleShape2D_gynul")
+
+[node name="Platform4" type="StaticBody2D" parent="."]
+z_index = 1
+position = Vector2(258, 482)
+collision_layer = 9
+collision_mask = 0
+
+[node name="TextureRect" type="TextureRect" parent="Platform4"]
+offset_left = -98.0
+offset_top = -43.0
+offset_right = 112.0
+offset_bottom = 36.0
+texture = ExtResource("4_gg4pt")
+stretch_mode = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4"]
+position = Vector2(4.5, -0.5)
 scale = Vector2(0.2, 0.5)
 shape = SubResource("RectangleShape2D_gynul")
 

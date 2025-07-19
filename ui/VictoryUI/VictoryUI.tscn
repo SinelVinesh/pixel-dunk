@@ -47,13 +47,11 @@ vertical_alignment = 1
 position = Vector2(451, 451.25)
 scale = Vector2(7.45313, 7.45313)
 sprite_frames = ExtResource("3_1m2pw")
-animation = &"carry_0"
-frame_progress = 0.143967
+animation = &"frog_0"
 
 [node name="Winner2" type="AnimatedSprite2D" parent="."]
 position = Vector2(841, 451.25)
 scale = Vector2(7.45313, 7.45313)
 sprite_frames = ExtResource("3_1m2pw")
-animation = &"carry_0"
-frame_progress = 0.608571
+animation = &"rabbit_1"
 flip_h = true

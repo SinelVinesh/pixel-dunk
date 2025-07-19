@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cqjdcl176di7l"]
 
 [ext_resource type="Script" uid="uid://668abr568kx0" path="res://scenes/main/main.gd" id="1_hyk8p"]
-[ext_resource type="AudioStream" uid="uid://d4nne0c24j02e" path="res://assets/audio/hip-hop-299830.mp3" id="2_iuonh"]
+[ext_resource type="AudioStream" uid="uid://bchnnji7y8hfg" path="res://assets/audio/Pixel_Dunking.ogg" id="2_iuonh"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_hyk8p")
